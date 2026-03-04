@@ -1,0 +1,33 @@
+# Built outputs
+build/
+app/build/
+
+# Local configuration (contains SDK path, do not commit)
+local.properties
+
+# Gradle wrapper caches
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Android Studio navigation editor temp files
+.navigation/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Keystore files (sensitive — keep out of source control)
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Claude internal
+.claude/
