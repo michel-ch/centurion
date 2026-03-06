@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Head -->
+    <path android:fillColor="#D0D0D0" android:pathData="M98,46 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Torso with slight forward lean -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M98,54 L104,76"/>
+    <!-- Upper leg (thigh forward-down) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M104,76 L85,92"/>
+    <!-- Lower leg/foot -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M85,92 L93,92"/>
+    <!-- Back leg (secondary) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M108,77 L125,88 L132,92"/>
+    <!-- Arms extended forward for balance -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M104,68 L86,66"/>
+    <!-- Second arm (secondary) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M108,69 L126,67"/>
+</vector>

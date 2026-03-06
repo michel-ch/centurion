@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Pull-up bar (horizontal) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="4" android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M50,20 L150,20"/>
+    <!-- Bar handles (vertical) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:pathData="M82,20 L82,28 M118,20 L118,28"/>
+    <!-- Head (hanging) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M100,32 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Torso hanging -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,40 L100,65"/>
+    <!-- Arms up to bar -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,42 L82,22"/>
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,42 L118,22"/>
+    <!-- Knees raised at 90 degrees -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,65 L88,70 L88,82"/>
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,65 L112,70 L112,82"/>
+    <!-- Red upward arrow at knees -->
+    <path android:strokeColor="#E53935" android:strokeWidth="2" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M75,68 L75,58 L71,62 M75,58 L79,62"/>
+</vector>

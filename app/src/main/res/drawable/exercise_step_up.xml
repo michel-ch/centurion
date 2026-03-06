@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Step/box -->
+    <path android:fillColor="#2C2C2C" android:pathData="M100,72 h70 v20 h-70 z"/>
+    <!-- Head -->
+    <path android:fillColor="#D0D0D0" android:pathData="M85,45 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Torso -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M85,53 L86,74"/>
+    <!-- Front foot on step (elevated) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M86,74 L100,72 L115,72"/>
+    <!-- Back leg on ground -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M86,74 L72,92"/>
+    <!-- Back foot -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M72,92 L60,92"/>
+    <!-- Arms: natural swing -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M85,62 L74,70"/>
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M87,62 L96,72"/>
+    <!-- Red upward arrow showing step direction -->
+    <path android:strokeColor="#E53935" android:strokeWidth="2" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M160,80 L160,68 L156,72 M160,68 L164,72"/>
+</vector>

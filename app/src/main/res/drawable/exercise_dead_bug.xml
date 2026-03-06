@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Head (lying on back) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M45,84 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Torso on ground -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M50,88 L130,88"/>
+    <!-- One arm raised up and extended -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M70,88 L70,65 L80,55"/>
+    <!-- Opposite leg raised -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M120,88 L130,75 L145,58"/>
+    <!-- Other arm extended along ground (behind head) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M70,88 L50,88 L35,85"/>
+    <!-- Other leg down on ground -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M110,88 L125,92"/>
+    <!-- Red arrows indicating movement -->
+    <path android:strokeColor="#E53935" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M78,52 L84,48 L84,54 M84,48 L88,52"/>
+</vector>

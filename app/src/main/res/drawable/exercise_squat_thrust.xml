@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Head (plank position) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M52,58 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Neck -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M52,66 L58,70"/>
+    <!-- Plank body -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M58,70 L120,74 L140,82 L150,92 L158,85"/>
+    <!-- Front arm on ground -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M58,70 L38,92"/>
+    <!-- Back arm (secondary) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M62,72 L42,92"/>
+    <!-- Arrow showing leg thrust back -->
+    <path android:strokeColor="#E53935" android:strokeWidth="2" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M130,72 L155,80 L150,77 M155,80 L151,83"/>
+    <!-- Small squat position indicator (ghost) at left -->
+    <path android:strokeColor="#888888" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M170,72 L165,84 L175,84"/>
+    <path android:fillColor="#888888" android:pathData="M170,66 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"/>
+</vector>

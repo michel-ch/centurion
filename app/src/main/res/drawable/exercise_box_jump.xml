@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Box -->
+    <path android:fillColor="#2C2C2C" android:pathData="M100,60 h70 v32 h-70 z"/>
+    <!-- Head (on top of box, landed) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M130,38 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Torso on box -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M130,46 L132,56"/>
+    <!-- Legs bent on landing on box -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M132,56 L122,60"/>
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M132,56 L142,60"/>
+    <!-- Arms -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M130,52 L120,48"/>
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M130,52 L140,48"/>
+    <!-- Red upward-right arrow showing jump approach -->
+    <path android:strokeColor="#E53935" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M40,75 L60,52 L57,56 M60,52 L64,55"/>
+    <!-- Jump start position figure (simplified) at left -->
+    <path android:strokeColor="#888888" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M40,80 L40,88 L35,92 M40,80 L45,88 L50,92 M40,75 L35,68 M40,75 L45,68"/>
+    <path android:fillColor="#888888" android:pathData="M40,68 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"/>
+</vector>

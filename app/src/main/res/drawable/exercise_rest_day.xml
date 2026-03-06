@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Bed/mat surface -->
+    <path android:fillColor="#1E1E1E" android:pathData="M20,80 h160 v8 h-160 z"/>
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1" android:fillColor="#00000000"
+        android:pathData="M20,80 h160 v8 h-160 z"/>
+    <!-- Head on pillow (larger circle) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M50,72 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0"/>
+    <!-- Body lying down -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M58,78 L145,80"/>
+    <!-- Legs -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M145,80 L165,82"/>
+    <!-- ZZZ symbols (secondary color) -->
+    <!-- Large Z -->
+    <path android:strokeColor="#888888" android:strokeWidth="2" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M130,35 L145,35 L130,48 L145,48"/>
+    <!-- Medium z -->
+    <path android:strokeColor="#888888" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M150,22 L160,22 L150,30 L160,30"/>
+    <!-- Small z -->
+    <path android:strokeColor="#888888" android:strokeWidth="1" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M162,12 L169,12 L162,18 L169,18"/>
+</vector>

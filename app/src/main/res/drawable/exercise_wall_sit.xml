@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Wall -->
+    <path android:fillColor="#2C2C2C" android:pathData="M160,30 h5 v65 h-5 z"/>
+    <!-- Head (back against wall) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M150,45 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Back flat on wall (vertical) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M156,53 L158,78"/>
+    <!-- Thighs horizontal (parallel to ground) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M158,78 L100,78"/>
+    <!-- Shins vertical (90 degree) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,78 L100,92"/>
+    <!-- Feet -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M100,92 L88,92"/>
+    <!-- Arms resting on thighs -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M155,63 L148,78"/>
+    <!-- Second arm (secondary) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M158,65 L152,78"/>
+    <!-- 90-degree angle indicator -->
+    <path android:strokeColor="#E53935" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M107,78 L107,84 L100,84"/>
+</vector>

@@ -41,7 +41,7 @@ fun OnboardingScreen(
     val isSaving by viewModel.isSaving.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
 
-    val isStepValid = viewModel.isCurrentStepValid()
+    val isStepValid = remember(state, currentStep) { viewModel.isCurrentStepValid() }
     val totalSteps = OnboardingViewModel.TOTAL_STEPS
 
     Scaffold(

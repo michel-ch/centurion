@@ -36,6 +36,7 @@ fun HomeScreen(
     onStartWorkout: (week: Int, day: Int) -> Unit,
     onNavigateToProgram: () -> Unit,
     onNavigateToProgress: () -> Unit,
+    onNavigateToNutrition: () -> Unit,
     onNavigateToWeightLog: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
@@ -58,8 +59,9 @@ fun HomeScreen(
                         0 -> { /* Already on Home */ }
                         1 -> onNavigateToProgram()
                         2 -> onNavigateToProgress()
-                        3 -> onNavigateToWeightLog()
-                        4 -> onNavigateToSettings()
+                        3 -> onNavigateToNutrition()
+                        4 -> onNavigateToWeightLog()
+                        5 -> onNavigateToSettings()
                     }
                 }
             )
@@ -447,6 +449,7 @@ private fun BottomNavigationBar(
             BottomNavItem("HOME", Icons.Filled.Home, Icons.Outlined.Home),
             BottomNavItem("PROGRAM", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
             BottomNavItem("PROGRESS", Icons.Filled.BarChart, Icons.Outlined.BarChart),
+            BottomNavItem("NUTRITION", Icons.Filled.LocalDining, Icons.Outlined.LocalDining),
             BottomNavItem("WEIGHT", Icons.Filled.MonitorWeight, Icons.Outlined.MonitorWeight),
             BottomNavItem("SETTINGS", Icons.Filled.Settings, Icons.Outlined.Settings)
         )

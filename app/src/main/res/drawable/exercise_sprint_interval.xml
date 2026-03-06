@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="112dp"
+    android:viewportWidth="200"
+    android:viewportHeight="112">
+    <!-- Background -->
+    <path android:fillColor="#121212" android:pathData="M0,0h200v112h-200z"/>
+    <!-- Ground -->
+    <path android:strokeColor="#2A2A2A" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:pathData="M0,92 L200,92"/>
+    <!-- Head (leaning forward, sprinting) -->
+    <path android:fillColor="#D0D0D0" android:pathData="M85,40 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0"/>
+    <!-- Torso (slight forward lean) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M85,48 L90,68"/>
+    <!-- Front leg driving up -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M90,68 L80,80 L88,92"/>
+    <!-- Back leg pushing off -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M90,68 L108,80 L115,90"/>
+    <!-- Front arm (driving forward) -->
+    <path android:strokeColor="#D0D0D0" android:strokeWidth="3" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M90,58 L78,48"/>
+    <!-- Back arm (driving back) -->
+    <path android:strokeColor="#888888" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M90,58 L100,70"/>
+    <!-- Red forward arrow -->
+    <path android:strokeColor="#E53935" android:strokeWidth="2.5" android:fillColor="#00000000"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M130,55 L155,55 L149,51 M155,55 L149,59"/>
+    <!-- Speed lines -->
+    <path android:strokeColor="#E53935" android:strokeWidth="1.5" android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M130,65 L148,65 M130,72 L145,72"/>
+</vector>

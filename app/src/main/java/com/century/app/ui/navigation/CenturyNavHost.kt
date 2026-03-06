@@ -19,6 +19,8 @@ import com.century.app.ui.weightlog.WeightLogScreen
 import com.century.app.ui.weightlog.WeightLogViewModel
 import com.century.app.ui.settings.SettingsScreen
 import com.century.app.ui.settings.SettingsViewModel
+import com.century.app.ui.nutrition.NutritionScreen
+import com.century.app.ui.nutrition.NutritionViewModel
 
 sealed class Screen(val route: String) {
     data object Onboarding : Screen("onboarding")
@@ -28,6 +30,7 @@ sealed class Screen(val route: String) {
     }
     data object Program : Screen("program")
     data object Progress : Screen("progress")
+    data object Nutrition : Screen("nutrition")
     data object WeightLog : Screen("weight_log")
     data object Settings : Screen("settings")
 }
@@ -66,6 +69,7 @@ fun CenturyNavHost() {
                 },
                 onNavigateToProgram = { navController.navigate(Screen.Program.route) },
                 onNavigateToProgress = { navController.navigate(Screen.Progress.route) },
+                onNavigateToNutrition = { navController.navigate(Screen.Nutrition.route) },
                 onNavigateToWeightLog = { navController.navigate(Screen.WeightLog.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
             )
@@ -105,6 +109,14 @@ fun CenturyNavHost() {
         composable(Screen.Progress.route) {
             val viewModel: ProgressViewModel = hiltViewModel()
             ProgressScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Nutrition.route) {
+            val viewModel: NutritionViewModel = hiltViewModel()
+            NutritionScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )

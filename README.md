@@ -56,6 +56,7 @@ app/src/main/java/com/century/app/
 │   ├── workout/               # Active workout tracking
 │   ├── program/               # 4-week calendar view
 │   ├── progress/              # Stats and charts
+│   ├── nutrition/             # Calorie & macro calculator
 │   ├── weightlog/             # Body weight tracking
 │   └── settings/              # App configuration
 ├── util/                      # Helpers (calories, images)
@@ -85,6 +86,7 @@ See the full list of illustration IDs in `TrainingProgram.kt`.
 - **Body Weight Logging:** Track weight with trend visualization
 - **Push-Up Test Tracking:** Record max push-up tests on Day 6 of each week
 - **Progress Stats:** BMI, streaks, total reps, calorie estimates
+- **Nutrition Calculator:** Personalized BMR/TDEE, daily calorie target, macronutrient split (protein/carbs/fat), hydration goal, BMI scale, and goal-aware tips — derived from your profile (cut / maintain / bulk)
 - **Daily Reminders:** Configurable notifications via WorkManager
 - **Custom Exercise Images:** Replace any illustration with personal photos
 - **Dark Brutalist Theme:** High-contrast dark theme with red accents
@@ -97,3 +99,31 @@ See the full list of illustration IDs in `TrainingProgram.kt`.
 - **Success:** #22C55E (Green)
 - **Typography:** Monospace headings, sans-serif body
 - **Aesthetic:** Brutalist fitness — bold, high contrast, sharp corners
+
+## Screens
+
+| Screen | Description |
+|---|---|
+| Onboarding | Multi-step profile setup (name, gender, age, height, weight, fitness level, goal weight, notification time) |
+| Home | Today's workout card, quick-access grid, streak counter |
+| Workout | Set-by-set tracking with rest timers, timed exercise countdowns, completion summary |
+| Program | 4-week calendar grid with day status (complete / today / locked) |
+| Progress | Charts for push-up reps over time, weight trend, total reps, streaks, calorie burn |
+| Nutrition | BMR/TDEE, daily calorie target, macro split, hydration goal, BMI scale, nutrition tips |
+| Weight Log | Daily weigh-in entry with trend chart |
+| Settings | Notification toggle/time picker, unit preferences (kg/lbs, cm/ft), data reset, CSV export |
+
+## Screens Navigation
+
+```
+Onboarding ──► Home ──► Workout
+                  ├──► Program ──► Workout
+                  ├──► Progress
+                  ├──► Nutrition
+                  ├──► Weight Log
+                  └──► Settings
+```
+
+## License
+
+Private project — all rights reserved.
