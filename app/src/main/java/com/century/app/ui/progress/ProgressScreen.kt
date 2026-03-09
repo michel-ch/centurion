@@ -19,6 +19,7 @@ import com.century.app.data.local.entity.PushUpTest
 import com.century.app.data.local.entity.WeightLog
 import com.century.app.ui.components.CenturyCard
 import com.century.app.ui.components.CenturyTopBar
+import com.century.app.ui.components.InfoIconButton
 import com.century.app.ui.components.StatCard
 import com.century.app.ui.theme.*
 import java.text.SimpleDateFormat
@@ -160,11 +161,17 @@ private fun BmiCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(
-                    text = "BMI",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = TextSecondary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "BMI",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextSecondary
+                    )
+                    InfoIconButton(
+                        title = "BMI — Body Mass Index",
+                        body = "BMI is a simple measure of body weight relative to height.\n\nFormula: weight (kg) ÷ height² (m²)\n\n• Underweight: < 18.5\n• Normal: 18.5 – 24.9\n• Overweight: 25 – 29.9\n• Obese: ≥ 30\n\nNote: BMI doesn't distinguish muscle from fat, so athletic people may score higher."
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = String.format("%.1f", bmi),

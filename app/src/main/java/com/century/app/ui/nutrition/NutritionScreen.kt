@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.century.app.data.local.entity.UserProfile
 import com.century.app.ui.components.CenturyTopBar
+import com.century.app.ui.components.InfoIconButton
 import com.century.app.ui.theme.*
 import kotlin.math.roundToInt
 
@@ -144,6 +145,10 @@ private fun CaloriesCard(
                     tint = CenturyRed, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("DAILY CALORIES", style = MaterialTheme.typography.labelLarge, color = TextSecondary)
+                InfoIconButton(
+                    title = "Daily Calories",
+                    body = "Your daily calorie target is calculated from your BMR and TDEE, then adjusted for your goal (cut, maintain, or bulk).\n\n• BMR – calories your body burns at complete rest\n• TDEE – total calories burned with daily activity\n• TARGET – your adjusted daily intake"
+                )
                 Spacer(Modifier.weight(1f))
                 GoalChip(label = goalLabel, color = goalColor, icon = goalIcon)
             }
@@ -218,6 +223,10 @@ private fun MacrosCard(proteinG: Int, carbG: Int, fatG: Int, totalCal: Int) {
                     tint = CenturyRed, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("MACRONUTRIENTS", style = MaterialTheme.typography.labelLarge, color = TextSecondary)
+                InfoIconButton(
+                    title = "Macronutrients",
+                    body = "Macros are the three main nutrients your body uses for energy:\n\n• Protein (4 kcal/g) – builds and repairs muscle. Aim for ~1.8g per kg of bodyweight.\n• Carbohydrates (4 kcal/g) – your body's primary fuel source, especially during workouts.\n• Fat (9 kcal/g) – supports hormones and joint health. Keep around 25% of total calories."
+                )
             }
 
             // Split bar
@@ -359,6 +368,10 @@ private fun BmiCard(profile: UserProfile) {
                     tint = CenturyRed, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("BODY MASS INDEX", style = MaterialTheme.typography.labelLarge, color = TextSecondary)
+                InfoIconButton(
+                    title = "BMI — Body Mass Index",
+                    body = "BMI is a simple measure of body weight relative to height.\n\nFormula: weight (kg) ÷ height² (m²)\n\n• Underweight: < 18.5\n• Normal: 18.5 – 24.9\n• Overweight: 25 – 29.9\n• Obese: ≥ 30\n\nNote: BMI doesn't distinguish muscle from fat, so athletic people may score higher."
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
