@@ -33,6 +33,52 @@ import com.century.app.ui.theme.*
 import com.century.app.util.ExerciseImageHelper
 import java.io.File
 
+@Composable
+fun InfoIconButton(
+    title: String,
+    body: String
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    IconButton(onClick = { showDialog = true }) {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = "Info",
+            tint = TextTertiary,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            text = {
+                Text(
+                    text = body,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text(
+                        "GOT IT",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = CenturyRed
+                    )
+                }
+            },
+            containerColor = DarkSurfaceVariant
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CenturyTopBar(
@@ -42,12 +88,21 @@ fun CenturyTopBar(
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = title.uppercase(),
-                style = MaterialTheme.typography.headlineMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Column {
+                Text(
+                    text = title.uppercase(),
+                    style = MaterialTheme.typography.headlineMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "STRENGTH AND HONOR",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CenturyRed.copy(alpha = 0.7f),
+                    letterSpacing = 2.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         },
         navigationIcon = {
             if (onBack != null) {

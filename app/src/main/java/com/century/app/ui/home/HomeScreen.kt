@@ -9,18 +9,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -33,12 +30,7 @@ import com.century.app.ui.theme.*
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onStartWorkout: (week: Int, day: Int) -> Unit,
-    onNavigateToProgram: () -> Unit,
-    onNavigateToProgress: () -> Unit,
-    onNavigateToNutrition: () -> Unit,
-    onNavigateToWeightLog: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onStartWorkout: (week: Int, day: Int) -> Unit
 ) {
     val profile by viewModel.profile.collectAsState()
     val totalReps by viewModel.totalReps.collectAsState()
@@ -46,26 +38,8 @@ fun HomeScreen(
     val completedCount by viewModel.completedCount.collectAsState()
     val weekProgress by viewModel.weekProgress.collectAsState()
 
-    var selectedTab by remember { mutableIntStateOf(0) }
-
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            BottomNavigationBar(
-                selectedTab = selectedTab,
-                onTabSelected = { index ->
-                    selectedTab = index
-                    when (index) {
-                        0 -> { /* Already on Home */ }
-                        1 -> onNavigateToProgram()
-                        2 -> onNavigateToProgress()
-                        3 -> onNavigateToNutrition()
-                        4 -> onNavigateToWeightLog()
-                        5 -> onNavigateToSettings()
-                    }
-                }
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -75,6 +49,15 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Motto
+            Text(
+                text = "STRENGTH AND HONOR",
+                style = MaterialTheme.typography.labelSmall,
+                color = CenturyRed.copy(alpha = 0.7f),
+                letterSpacing = 2.sp,
+                fontWeight = FontWeight.Bold
+            )
+
             // Greeting Header
             GreetingHeader(
                 name = profile?.name ?: "Warrior",
@@ -435,58 +418,3 @@ private fun WeeklyProgressSection(
     }
 }
 
-@Composable
-private fun BottomNavigationBar(
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit
-) {
-    NavigationBar(
-        containerColor = DarkSurface,
-        contentColor = TextSecondary,
-        tonalElevation = 0.dp
-    ) {
-        val items = listOf(
-            BottomNavItem("HOME", Icons.Filled.Home, Icons.Outlined.Home),
-            BottomNavItem("PROGRAM", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
-            BottomNavItem("PROGRESS", Icons.Filled.BarChart, Icons.Outlined.BarChart),
-            BottomNavItem("NUTRITION", Icons.Filled.LocalDining, Icons.Outlined.LocalDining),
-            BottomNavItem("WEIGHT", Icons.Filled.MonitorWeight, Icons.Outlined.MonitorWeight),
-            BottomNavItem("SETTINGS", Icons.Filled.Settings, Icons.Outlined.Settings)
-        )
-
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        if (index == selectedTab) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                selected = index == selectedTab,
-                onClick = { onTabSelected(index) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = CenturyRed,
-                    selectedTextColor = CenturyRed,
-                    unselectedIconColor = TextTertiary,
-                    unselectedTextColor = TextTertiary,
-                    indicatorColor = DarkSurfaceVariant
-                )
-            )
-        }
-    }
-}
-
-private data class BottomNavItem(
-    val label: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
-)

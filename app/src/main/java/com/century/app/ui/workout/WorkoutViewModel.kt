@@ -71,6 +71,13 @@ class WorkoutViewModel @Inject constructor(
     private var accumulatedRestTimeMs: Long = 0L
 
     fun loadWorkout(week: Int, day: Int) {
+        // Guard: don't reload if already loaded for the same day (prevents orientation reset)
+        val current = _uiState.value
+        if (!current.isLoading && current.weekNumber == week && current.dayNumber == day
+            && current.exercises.isNotEmpty() && current.error == null) {
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
