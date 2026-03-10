@@ -275,6 +275,41 @@ class WorkoutViewModel @Inject constructor(
         saveExerciseProgress(exerciseIndex, 0, false)
     }
 
+    fun completeMaxTest(exerciseIndex: Int, achievedCount: Int) {
+        val state = _uiState.value
+        val exercise = state.exercises.getOrNull(exerciseIndex) ?: return
+        val exerciseState = state.exerciseStates.getOrNull(exerciseIndex) ?: return
+        if (exerciseState.isCompleted) return
+
+        val updatedState = exerciseState.copy(setsCompleted = exercise.sets, isCompleted = true)
+        val updatedStates = state.exerciseStates.toMutableList()
+        updatedStates[exerciseIndex] = updatedState
+        _uiState.value = state.copy(exerciseStates = updatedStates)
+
+        viewModelScope.launch {
+            val log = ExerciseLog(
+                sessionId = state.sessionId,
+                exerciseName = exercise.name,
+                illustrationId = exercise.illustrationId,
+                targetSets = exercise.sets,
+                targetReps = exercise.reps,
+                completedSets = exercise.sets,
+                completedReps = achievedCount,
+                restBetweenSetsSec = exercise.restBetweenSetsSec,
+                restBetweenExercisesSec = exercise.restBetweenExercisesSec,
+                completedAt = System.currentTimeMillis()
+            )
+            repository.insertExercise(log)
+        }
+
+        val allDone = updatedStates.all { it.isCompleted }
+        if (allDone) {
+            finishWorkout()
+        } else {
+            startRestTimer(exercise.restBetweenExercisesSec)
+        }
+    }
+
     fun skipRest() {
         restTimerJob?.cancel()
         restTimerJob = null

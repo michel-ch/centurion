@@ -6,8 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.century.app.ui.navigation.CenturyNavHost
+import com.century.app.ui.settings.SettingsViewModel
 import com.century.app.ui.theme.CenturyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,7 +21,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CenturyTheme {
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+            val profile by settingsViewModel.profile.collectAsState()
+            val useDarkTheme = profile?.useDarkTheme ?: true
+            CenturyTheme(darkTheme = useDarkTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     CenturyNavHost()
                 }

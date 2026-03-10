@@ -52,6 +52,9 @@ class WeightLogViewModel @Inject constructor(
                     loggedAt = _selectedDate.value
                 )
             )
+            profile.value?.let {
+                repository.updateProfile(it.copy(bodyWeight = weight, updatedAt = System.currentTimeMillis()))
+            }
             _inputWeight.value = ""
         }
     }
