@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -129,6 +131,7 @@ fun WorkoutScreen(
                     onCompleteSet = { viewModel.completeSet(it) },
                     onCompleteExercise = { viewModel.completeExercise(it) },
                     onUncompleteExercise = { viewModel.uncompleteExercise(it) },
+                    onCompleteMaxTest = { index, count -> viewModel.completeMaxTest(index, count) },
                     onStartTimer = { viewModel.startTimedExercise(it) },
                     onPauseTimer = { viewModel.pauseTimedExercise(it) },
                     onResetTimer = { viewModel.resetTimedExercise(it) },
@@ -146,6 +149,7 @@ private fun WorkoutContent(
     onCompleteSet: (Int) -> Unit,
     onCompleteExercise: (Int) -> Unit,
     onUncompleteExercise: (Int) -> Unit,
+    onCompleteMaxTest: (Int, Int) -> Unit,
     onStartTimer: (Int) -> Unit,
     onPauseTimer: (Int) -> Unit,
     onResetTimer: (Int) -> Unit,
@@ -191,6 +195,7 @@ private fun WorkoutContent(
                 exerciseState = exerciseState,
                 timedState = timedState,
                 onSetTap = { onCompleteSet(index) },
+                onMaxTestComplete = { count -> onCompleteMaxTest(index, count) },
                 onCompleteToggle = { isChecked ->
                     if (isChecked) onCompleteExercise(index) else onUncompleteExercise(index)
                 },
@@ -279,6 +284,7 @@ private fun ExerciseCard(
     exerciseState: ExerciseState,
     timedState: TimedExerciseState?,
     onSetTap: () -> Unit,
+    onMaxTestComplete: (Int) -> Unit,
     onCompleteToggle: (Boolean) -> Unit,
     onStartTimer: () -> Unit,
     onPauseTimer: () -> Unit,
@@ -289,6 +295,18 @@ private fun ExerciseCard(
         animationSpec = tween(300),
         label = "card_alpha"
     )
+    var showMaxTestDialog by remember { mutableStateOf(false) }
+
+    if (showMaxTestDialog) {
+        MaxTestInputDialog(
+            exerciseName = exercise.name,
+            onConfirm = { count ->
+                showMaxTestDialog = false
+                onMaxTestComplete(count)
+            },
+            onDismiss = { showMaxTestDialog = false }
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -394,7 +412,13 @@ private fun ExerciseCard(
                     SetTrackerRow(
                         totalSets = exercise.sets,
                         completedSets = exerciseState.setsCompleted,
-                        onSetTap = { onSetTap() }
+                        onSetTap = {
+                            if (exercise.isMaxTest) {
+                                showMaxTestDialog = true
+                            } else {
+                                onSetTap()
+                            }
+                        }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -566,6 +590,76 @@ private fun TimedExerciseTimer(
             }
         }
     }
+}
+
+// ==================== MAX TEST INPUT DIALOG ====================
+
+@Composable
+private fun MaxTestInputDialog(
+    exerciseName: String,
+    onConfirm: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var input by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = exerciseName.uppercase(),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Black
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "How many did you complete?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = {
+                        input = it
+                        isError = false
+                    },
+                    label = { Text("Count") },
+                    isError = isError,
+                    supportingText = if (isError) {
+                        { Text("Enter a valid number", color = CenturyRed) }
+                    } else null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = CenturyRed
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val count = input.trim().toIntOrNull()
+                    if (count != null && count > 0) {
+                        onConfirm(count)
+                    } else {
+                        isError = true
+                    }
+                },
+                colors = ButtonDefaults.textButtonColors(contentColor = CenturyRed)
+            ) {
+                Text("CONFIRM", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("CANCEL")
+            }
+        }
+    )
 }
 
 // ==================== COMPLETION CELEBRATION SCREEN ====================

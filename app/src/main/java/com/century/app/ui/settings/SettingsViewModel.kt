@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.century.app.data.local.entity.UserProfile
 import com.century.app.data.repository.CenturyRepository
+import com.century.app.worker.ReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -67,7 +68,9 @@ class SettingsViewModel @Inject constructor(
     fun toggleReminder() {
         viewModelScope.launch {
             profile.value?.let {
-                repository.updateProfile(it.copy(reminderEnabled = !it.reminderEnabled, updatedAt = System.currentTimeMillis()))
+                val newEnabled = !it.reminderEnabled
+                repository.updateProfile(it.copy(reminderEnabled = newEnabled, updatedAt = System.currentTimeMillis()))
+                ReminderWorker.schedule(context, it.reminderTime, newEnabled)
             }
         }
     }
@@ -76,6 +79,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             profile.value?.let {
                 repository.updateProfile(it.copy(reminderTime = time, updatedAt = System.currentTimeMillis()))
+                ReminderWorker.schedule(context, time, it.reminderEnabled)
             }
         }
     }
