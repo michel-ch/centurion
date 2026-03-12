@@ -430,12 +430,24 @@ private fun ExerciseCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onCompleteToggle(!exerciseState.isCompleted) },
+                        .clickable {
+                            if (exercise.isMaxTest && !exerciseState.isCompleted) {
+                                showMaxTestDialog = true
+                            } else {
+                                onCompleteToggle(!exerciseState.isCompleted)
+                            }
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
                         checked = exerciseState.isCompleted,
-                        onCheckedChange = { onCompleteToggle(it) },
+                        onCheckedChange = { isChecked ->
+                            if (exercise.isMaxTest && isChecked && !exerciseState.isCompleted) {
+                                showMaxTestDialog = true
+                            } else {
+                                onCompleteToggle(isChecked)
+                            }
+                        },
                         colors = CheckboxDefaults.colors(
                             checkedColor = CenturyGreen,
                             uncheckedColor = TextTertiary,

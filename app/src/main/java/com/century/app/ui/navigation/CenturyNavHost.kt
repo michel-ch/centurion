@@ -102,8 +102,8 @@ fun CenturyNavHost() {
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(
-                    containerColor = DarkSurface,
-                    contentColor = TextSecondary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     tonalElevation = 0.dp
                 ) {
                     bottomNavItems.forEachIndexed { index, item ->
@@ -133,9 +133,9 @@ fun CenturyNavHost() {
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = CenturyRed,
                                 selectedTextColor = CenturyRed,
-                                unselectedIconColor = TextTertiary,
-                                unselectedTextColor = TextTertiary,
-                                indicatorColor = DarkSurfaceVariant
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                indicatorColor = MaterialTheme.colorScheme.surfaceVariant
                             )
                         )
                     }

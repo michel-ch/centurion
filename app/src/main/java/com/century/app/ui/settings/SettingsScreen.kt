@@ -1,6 +1,11 @@
 package com.century.app.ui.settings
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.century.app.ui.components.CenturyCard
 import com.century.app.ui.components.CenturyTopBar
 import com.century.app.ui.theme.*
@@ -34,6 +40,14 @@ fun SettingsScreen(
     var nameInput by remember { mutableStateOf("") }
     var editWeight by remember { mutableStateOf(false) }
     var weightInput by remember { mutableStateOf("") }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.toggleReminder()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -292,7 +306,18 @@ fun SettingsScreen(
                         }
                         Switch(
                             checked = profile?.reminderEnabled ?: true,
-                            onCheckedChange = { viewModel.toggleReminder() },
+                            onCheckedChange = { newEnabled ->
+                                val needsPermission = newEnabled &&
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                if (needsPermission) {
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.toggleReminder()
+                                }
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = CenturyRed,
                                 checkedTrackColor = CenturyRedDark
