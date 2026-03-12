@@ -27,6 +27,14 @@ class SettingsViewModel @Inject constructor(
     val profile: StateFlow<UserProfile?> = repository.getProfile()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    init {
+        viewModelScope.launch {
+            repository.getProfileOnce()?.let { p ->
+                ReminderWorker.schedule(context, p.reminderTime, p.reminderEnabled)
+            }
+        }
+    }
+
     fun updateProfile(profile: UserProfile) {
         viewModelScope.launch {
             repository.updateProfile(profile.copy(updatedAt = System.currentTimeMillis()))

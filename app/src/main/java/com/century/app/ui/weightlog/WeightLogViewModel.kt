@@ -43,8 +43,9 @@ class WeightLogViewModel @Inject constructor(
 
     fun logWeight() {
         val weight = _inputWeight.value.toFloatOrNull() ?: return
-        val unit = profile.value?.bodyWeightUnit ?: "kg"
         viewModelScope.launch {
+            val currentProfile = profile.value ?: repository.getProfileOnce()
+            val unit = currentProfile?.bodyWeightUnit ?: "kg"
             repository.insertWeightLog(
                 WeightLog(
                     weight = weight,
@@ -52,7 +53,7 @@ class WeightLogViewModel @Inject constructor(
                     loggedAt = _selectedDate.value
                 )
             )
-            profile.value?.let {
+            currentProfile?.let {
                 repository.updateProfile(it.copy(bodyWeight = weight, updatedAt = System.currentTimeMillis()))
             }
             _inputWeight.value = ""
