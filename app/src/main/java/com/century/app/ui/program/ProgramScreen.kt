@@ -96,7 +96,7 @@ private fun WeekAccordionCard(
     initiallyExpanded: Boolean,
     onDayClick: (week: Int, day: Int) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(initiallyExpanded) }
+    var expanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
 
     val completedInWeek = week.days.count { day ->
         completedDays.contains(week.weekNumber to day.dayNumber)
@@ -189,7 +189,6 @@ private fun WeekAccordionCard(
                                 day.dayNumber == currentDayInWeek
 
                         DayRow(
-                            week = week.weekNumber,
                             day = day,
                             isCompleted = isCompleted,
                             isToday = isToday,
@@ -204,7 +203,6 @@ private fun WeekAccordionCard(
 
 @Composable
 private fun DayRow(
-    week: Int,
     day: ProgramDay,
     isCompleted: Boolean,
     isToday: Boolean,
