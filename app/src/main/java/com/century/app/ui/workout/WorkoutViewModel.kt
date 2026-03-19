@@ -410,9 +410,7 @@ class WorkoutViewModel @Inject constructor(
             state.exercises.forEachIndexed { index, exercise ->
                 val exState = state.exerciseStates.getOrNull(index)
                 if (exState != null && exState.isCompleted) {
-                    val repsPerSet = exercise.reps
-                        .replace(Regex("[^0-9]"), "")
-                        .toIntOrNull() ?: 0
+                    val repsPerSet = Regex("\\d+").find(exercise.reps)?.value?.toIntOrNull() ?: 0
                     totalReps += exercise.sets * repsPerSet
                 }
             }
@@ -456,14 +454,10 @@ class WorkoutViewModel @Inject constructor(
             state.exercises.forEachIndexed { index, exercise ->
                 val exState = state.exerciseStates.getOrNull(index) ?: return@forEachIndexed
                 val repsCompleted = if (exState.isCompleted) {
-                    val perSet = exercise.reps
-                        .replace(Regex("[^0-9]"), "")
-                        .toIntOrNull() ?: 0
+                    val perSet = Regex("\\d+").find(exercise.reps)?.value?.toIntOrNull() ?: 0
                     exercise.sets * perSet
                 } else {
-                    val perSet = exercise.reps
-                        .replace(Regex("[^0-9]"), "")
-                        .toIntOrNull() ?: 0
+                    val perSet = Regex("\\d+").find(exercise.reps)?.value?.toIntOrNull() ?: 0
                     exState.setsCompleted * perSet
                 }
 
