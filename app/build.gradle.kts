@@ -21,14 +21,25 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+    }
 
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
+    signingConfigs {
+        @Suppress("UNCHECKED_CAST")
+        create("release") {
+            storeFile = rootProject.file("centurion.jks")
+            storePassword = "centurion123"
+            keyAlias = "centurion"
+            keyPassword = "centurion123"
         }
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
