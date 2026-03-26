@@ -116,9 +116,8 @@ class ProgressViewModel @Inject constructor(
         if (bmi <= 0f) return null
 
         val genderOffset = when (p.gender) {
-            "Male" -> 0f
             "Female" -> 10.8f
-            else -> 5.4f // midpoint for "Other"
+            else -> 0f
         }
         return bmi * 1.2f + p.age * 0.23f + genderOffset - 5.4f
     }
