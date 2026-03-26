@@ -552,7 +552,7 @@ private fun GenderStep(state: OnboardingState, viewModel: OnboardingViewModel) {
     StepSubtitle("This helps calculate calories and adjust exercises.")
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        listOf("Male", "Female", "Other").forEach { gender ->
+        listOf("Male", "Female").forEach { gender ->
             SelectableChip(
                 label = gender,
                 isSelected = state.gender == gender,
