@@ -33,38 +33,40 @@ class HomeViewModel @Inject constructor(
     private val _currentStreak = MutableStateFlow(0)
     val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
 
+    private val totalDays = TrainingProgramData.totalDays()
+
+    /** Days in the full program (28). Exposed for UI labels. */
+    val totalProgramDays: Int get() = totalDays
+
+    /** True once the user has advanced past the final program day. */
+    val isProgramComplete: Boolean
+        get() = (_profile.value?.currentDay ?: 1) > totalDays
+
+    // Clamp to the valid program range so week/day lookups never fall off the end:
+    // a finished program leaves currentDay at totalDays + 1.
+    private val effectiveDay: Int
+        get() = (_profile.value?.currentDay ?: 1).coerceIn(1, totalDays)
+
     val weekProgress: StateFlow<Float> = _profile.map { profile ->
         val currentDay = profile?.currentDay ?: 1
-        val weekIndex = (currentDay - 1) / 7
+        if (currentDay > totalDays) return@map 1f
         val dayInWeek = (currentDay - 1) % 7
         dayInWeek.toFloat() / 7f
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0f)
 
     val todayWorkout: ProgramDay
-        get() {
-            val currentDay = _profile.value?.currentDay ?: 1
-            val result = TrainingProgramData.getDayForProgram(currentDay)
-            return result?.second ?: TrainingProgramData.getProgram().first().days.first()
-        }
+        get() = TrainingProgramData.getDayForProgram(effectiveDay)?.second
+            ?: TrainingProgramData.getProgram().first().days.first()
 
     val currentWeek: ProgramWeek
-        get() {
-            val currentDay = _profile.value?.currentDay ?: 1
-            val result = TrainingProgramData.getDayForProgram(currentDay)
-            return result?.first ?: TrainingProgramData.getProgram().first()
-        }
+        get() = TrainingProgramData.getDayForProgram(effectiveDay)?.first
+            ?: TrainingProgramData.getProgram().first()
 
     val currentWeekNumber: Int
-        get() {
-            val currentDay = _profile.value?.currentDay ?: 1
-            return ((currentDay - 1) / 7) + 1
-        }
+        get() = ((effectiveDay - 1) / 7) + 1
 
     val currentDayInWeek: Int
-        get() {
-            val currentDay = _profile.value?.currentDay ?: 1
-            return ((currentDay - 1) % 7) + 1
-        }
+        get() = ((effectiveDay - 1) % 7) + 1
 
     init {
         loadProfile()
@@ -72,13 +74,12 @@ class HomeViewModel @Inject constructor(
 
     private fun loadProfile() {
         viewModelScope.launch {
-            val exists = repository.hasProfile()
-            _hasProfile.value = exists
+            _hasProfile.value = repository.hasProfile()
+        }
 
-            if (exists) {
-                repository.getProfile().collect { userProfile ->
-                    _profile.value = userProfile
-                }
+        viewModelScope.launch {
+            repository.getProfile().collect { userProfile ->
+                _profile.value = userProfile
             }
         }
 

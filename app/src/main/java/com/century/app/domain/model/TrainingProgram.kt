@@ -31,6 +31,9 @@ object TrainingProgramData {
 
     fun getProgram(): List<ProgramWeek> = listOf(week1, week2, week3, week4)
 
+    /** Total number of days in the program (4 weeks × 7 days = 28). */
+    fun totalDays(): Int = getProgram().sumOf { it.days.size }
+
     fun getDayForProgram(absoluteDay: Int): Pair<ProgramWeek, ProgramDay>? {
         val weekIndex = (absoluteDay - 1) / 7
         val dayIndex = (absoluteDay - 1) % 7
@@ -52,10 +55,12 @@ object TrainingProgramData {
 
         return if (isBeginner) {
             val adjustedReps = try {
-                val num = exercise.reps.replace(Regex("[^0-9]"), "").toIntOrNull()
+                // Use only the first number group so multi-number reps like "5/side"
+                // or "1-2-3...10 down" aren't mangled (replace() would rewrite every group).
+                val num = Regex("\\d+").find(exercise.reps)?.value?.toIntOrNull()
                 if (num != null && exercise.name.contains("Push-Up", ignoreCase = true)) {
                     val reduced = kotlin.math.ceil(num * 0.6).toInt()
-                    exercise.reps.replace(Regex("\\d+"), reduced.toString())
+                    exercise.reps.replaceFirst(Regex("\\d+"), reduced.toString())
                 } else exercise.reps
             } catch (_: Exception) { exercise.reps }
             exercise.copy(
@@ -65,10 +70,11 @@ object TrainingProgramData {
             )
         } else {
             val adjustedReps = try {
-                val num = exercise.reps.replace(Regex("[^0-9]"), "").toIntOrNull()
+                // Use only the first number group (see beginner branch above).
+                val num = Regex("\\d+").find(exercise.reps)?.value?.toIntOrNull()
                 if (num != null && exercise.name.contains("Push-Up", ignoreCase = true)) {
                     val increased = kotlin.math.ceil(num * 1.25).toInt()
-                    exercise.reps.replace(Regex("\\d+"), increased.toString())
+                    exercise.reps.replaceFirst(Regex("\\d+"), increased.toString())
                 } else exercise.reps
             } catch (_: Exception) { exercise.reps }
             exercise.copy(

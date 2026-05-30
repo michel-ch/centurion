@@ -16,11 +16,13 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -77,6 +79,7 @@ fun ProgramScreen(
                 WeekAccordionCard(
                     week = week,
                     completedDays = completedDays,
+                    currentDay = currentDay,
                     currentWeekNumber = currentWeekNumber,
                     currentDayInWeek = currentDayInWeek,
                     initiallyExpanded = week.weekNumber == currentWeekNumber,
@@ -91,6 +94,7 @@ fun ProgramScreen(
 private fun WeekAccordionCard(
     week: ProgramWeek,
     completedDays: Set<Pair<Int, Int>>,
+    currentDay: Int,
     currentWeekNumber: Int,
     currentDayInWeek: Int,
     initiallyExpanded: Boolean,
@@ -187,11 +191,16 @@ private fun WeekAccordionCard(
                         val isCompleted = completedDays.contains(week.weekNumber to day.dayNumber)
                         val isToday = week.weekNumber == currentWeekNumber &&
                                 day.dayNumber == currentDayInWeek
+                        // Days beyond the user's current day are locked until reached
+                        // (already-completed days stay open so missed days can be redone).
+                        val absoluteDay = (week.weekNumber - 1) * 7 + day.dayNumber
+                        val isLocked = absoluteDay > currentDay && !isCompleted
 
                         DayRow(
                             day = day,
                             isCompleted = isCompleted,
                             isToday = isToday,
+                            isLocked = isLocked,
                             onClick = { onDayClick(week.weekNumber, day.dayNumber) }
                         )
                     }
@@ -206,6 +215,7 @@ private fun DayRow(
     day: ProgramDay,
     isCompleted: Boolean,
     isToday: Boolean,
+    isLocked: Boolean,
     onClick: () -> Unit
 ) {
     val statusColor = when {
@@ -221,8 +231,9 @@ private fun DayRow(
             .background(
                 if (isToday) CenturyRed.copy(alpha = 0.08f) else Color.Transparent
             )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .clickable(enabled = !isLocked, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .alpha(if (isLocked) 0.45f else 1f),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -276,15 +287,20 @@ private fun DayRow(
         }
 
         // Status label
-        if (day.isRestDay) {
-            Icon(
+        when {
+            isLocked -> Icon(
+                Icons.Default.Lock,
+                contentDescription = "Locked",
+                modifier = Modifier.size(18.dp),
+                tint = TextTertiary
+            )
+            day.isRestDay -> Icon(
                 Icons.Default.SelfImprovement,
                 contentDescription = "Rest Day",
                 modifier = Modifier.size(18.dp),
                 tint = TextTertiary
             )
-        } else {
-            Icon(
+            else -> Icon(
                 Icons.Default.FitnessCenter,
                 contentDescription = "Workout",
                 modifier = Modifier.size(18.dp),
@@ -297,6 +313,7 @@ private fun DayRow(
             text = when {
                 isCompleted -> "DONE"
                 isToday -> "TODAY"
+                isLocked -> "LOCKED"
                 else -> ""
             },
             style = MaterialTheme.typography.labelSmall,

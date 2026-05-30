@@ -40,6 +40,7 @@ fun SettingsScreen(
     var nameInput by remember { mutableStateOf("") }
     var editWeight by remember { mutableStateOf(false) }
     var weightInput by remember { mutableStateOf("") }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -158,7 +159,7 @@ fun SettingsScreen(
                             label = "Body Weight",
                             value = "${String.format("%.1f", profile?.bodyWeight ?: 0f)} ${profile?.bodyWeightUnit ?: "kg"}",
                             onClick = {
-                                weightInput = String.format("%.1f", profile?.bodyWeight ?: 0f)
+                                weightInput = String.format(java.util.Locale.US, "%.1f", profile?.bodyWeight ?: 0f)
                                 editWeight = true
                             }
                         )
@@ -292,14 +293,16 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(
+                            modifier = Modifier.clickable { showTimePicker = true }
+                        ) {
                             Text(
                                 text = "Daily Reminder",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "at ${profile?.reminderTime ?: "07:00"}",
+                                text = "at ${profile?.reminderTime ?: "07:00"} · tap to change",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextSecondary
                             )
@@ -377,8 +380,8 @@ fun SettingsScreen(
                         label = "Export Data",
                         value = "CSV",
                         onClick = {
-                            viewModel.exportData()?.let {
-                                context.startActivity(Intent.createChooser(it, "Export Century Data"))
+                            viewModel.exportData { intent ->
+                                context.startActivity(Intent.createChooser(intent, "Export Century Data"))
                             }
                         }
                     )
@@ -443,7 +446,7 @@ fun SettingsScreen(
             },
             text = {
                 Text(
-                    "This will reset your 30-day program progress. Your weight log and workout history will be kept. Are you sure?",
+                    "This will reset your 28-day program progress. Your weight log and workout history will be kept. Are you sure?",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -461,6 +464,48 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
+                    Text("CANCEL")
+                }
+            }
+        )
+    }
+
+    // Reminder time picker dialog
+    if (showTimePicker) {
+        val parts = (profile?.reminderTime ?: "07:00").split(":")
+        val timeState = rememberTimePickerState(
+            initialHour = parts.getOrNull(0)?.toIntOrNull() ?: 7,
+            initialMinute = parts.getOrNull(1)?.toIntOrNull() ?: 0,
+            is24Hour = true
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = {
+                Text(
+                    "REMINDER TIME",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = CenturyRed
+                )
+            },
+            text = {
+                TimePicker(state = timeState)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val formatted = String.format(
+                            java.util.Locale.US, "%02d:%02d", timeState.hour, timeState.minute
+                        )
+                        viewModel.updateReminderTime(formatted)
+                        showTimePicker = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = CenturyRed)
+                ) {
+                    Text("SET")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
                     Text("CANCEL")
                 }
             }

@@ -38,6 +38,12 @@ fun HomeScreen(
     val completedCount by viewModel.completedCount.collectAsState()
     val weekProgress by viewModel.weekProgress.collectAsState()
 
+    // Streak is computed once and isn't backed by a reactive Flow, so refresh it
+    // every time Home is shown (e.g. on return from completing a workout).
+    LaunchedEffect(Unit) {
+        viewModel.refreshStreak()
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
@@ -62,6 +68,7 @@ fun HomeScreen(
             GreetingHeader(
                 name = profile?.name ?: "Warrior",
                 currentDay = profile?.currentDay ?: 1,
+                totalDays = viewModel.totalProgramDays,
                 profilePhotoUri = profile?.profilePhotoUri
             )
 
@@ -78,6 +85,7 @@ fun HomeScreen(
                 dayLabel = viewModel.todayWorkout.label,
                 exerciseCount = viewModel.todayWorkout.exercises.size,
                 isRestDay = viewModel.todayWorkout.isRestDay,
+                isProgramComplete = viewModel.isProgramComplete,
                 onStartWorkout = {
                     onStartWorkout(viewModel.currentWeekNumber, viewModel.currentDayInWeek)
                 }
@@ -106,6 +114,7 @@ fun HomeScreen(
 private fun GreetingHeader(
     name: String,
     currentDay: Int,
+    totalDays: Int,
     profilePhotoUri: String?
 ) {
     Row(
@@ -152,7 +161,7 @@ private fun GreetingHeader(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "DAY $currentDay OF 30",
+                text = if (currentDay > totalDays) "PROGRAM COMPLETE" else "DAY $currentDay OF $totalDays",
                 style = MaterialTheme.typography.labelLarge,
                 color = CenturyRed
             )
@@ -224,49 +233,70 @@ private fun TodayWorkoutCard(
     dayLabel: String,
     exerciseCount: Int,
     isRestDay: Boolean,
+    isProgramComplete: Boolean,
     onStartWorkout: () -> Unit
 ) {
     CenturyCard {
-        Text(
-            text = "TODAY'S WORKOUT",
-            style = MaterialTheme.typography.labelMedium,
-            color = TextSecondary
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = dayLabel,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = if (isRestDay) "RECOVERY DAY" else "$exerciseCount EXERCISES",
-            style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onStartWorkout,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(4.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = CenturyRed,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(
-                if (isRestDay) Icons.Default.SelfImprovement else Icons.Default.PlayArrow,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+        if (isProgramComplete) {
             Text(
-                text = if (isRestDay) "START RECOVERY" else "START WORKOUT",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black
+                text = "CHALLENGE COMPLETE",
+                style = MaterialTheme.typography.labelMedium,
+                color = CenturyGreen
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "100 PUSH-UPS",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "You conquered the program. Strength and honor.",
+                style = MaterialTheme.typography.bodySmall,
+                color = TextSecondary
+            )
+        } else {
+            Text(
+                text = "TODAY'S WORKOUT",
+                style = MaterialTheme.typography.labelMedium,
+                color = TextSecondary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = dayLabel,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (isRestDay) "RECOVERY DAY" else "$exerciseCount EXERCISES",
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onStartWorkout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CenturyRed,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Icon(
+                    if (isRestDay) Icons.Default.SelfImprovement else Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isRestDay) "START RECOVERY" else "START WORKOUT",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Black
+                )
+            }
         }
     }
 }

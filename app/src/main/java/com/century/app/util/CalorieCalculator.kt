@@ -19,7 +19,7 @@ object CalorieCalculator {
     }
 
     fun estimateExerciseDuration(sets: Int, reps: String, restBetweenSetsSec: Int): Float {
-        val repCount = reps.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 10
+        val repCount = Regex("\\d+").find(reps)?.value?.toIntOrNull() ?: 10
         val secondsPerRep = 3f
         val workTime = sets * repCount * secondsPerRep
         val restTime = (sets - 1) * restBetweenSetsSec

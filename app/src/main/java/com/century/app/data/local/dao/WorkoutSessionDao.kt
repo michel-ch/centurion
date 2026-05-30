@@ -12,7 +12,7 @@ interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_session WHERE isCompleted = 1 ORDER BY startedAt DESC")
     fun getCompletedSessions(): Flow<List<WorkoutSession>>
 
-    @Query("SELECT * FROM workout_session WHERE weekNumber = :week AND dayNumber = :day LIMIT 1")
+    @Query("SELECT * FROM workout_session WHERE weekNumber = :week AND dayNumber = :day ORDER BY startedAt DESC LIMIT 1")
     suspend fun getSessionForDay(week: Int, day: Int): WorkoutSession?
 
     @Query("SELECT * FROM workout_session WHERE id = :id")

@@ -46,8 +46,14 @@ fun ProgressScreen(
     val estimatedBodyFat = viewModel.estimateBodyFat()
 
     val totalDays = 28
+    // Count each program day once: redoing a completed day inserts a new session row,
+    // so completedSessions can contain duplicate (week, day) pairs.
+    val uniqueCompletedDays = completedSessions
+        .map { it.weekNumber to it.dayNumber }
+        .distinct()
+        .size
     val completionPercent = if (totalDays > 0) {
-        (completedSessions.size.toFloat() / totalDays * 100f)
+        (uniqueCompletedDays.toFloat() / totalDays * 100f).coerceAtMost(100f)
     } else 0f
 
     Scaffold(
@@ -90,7 +96,7 @@ fun ProgressScreen(
             StreakConsistencyCard(
                 currentStreak = streak,
                 longestStreak = longestStreak,
-                totalWorkouts = completedSessions.size,
+                totalWorkouts = uniqueCompletedDays,
                 completionPercent = completionPercent
             )
 
@@ -222,11 +228,12 @@ private fun BodyStatsRow(
             modifier = Modifier.weight(1f)
         )
         if (weightChange != null) {
-            val changePrefix = if (weightChange >= 0) "+" else ""
-            val changeColor = if (weightChange <= 0) CenturyGreen else CenturyOrange
+            val changeInUnit = if (weightUnit == "kg") weightChange else weightChange / 0.453592f
+            val changePrefix = if (changeInUnit >= 0) "+" else ""
+            val changeColor = if (changeInUnit <= 0) CenturyGreen else CenturyOrange
             StatCard(
                 label = "CHANGE",
-                value = "$changePrefix${String.format("%.1f", weightChange)}",
+                value = "$changePrefix${String.format("%.1f", changeInUnit)} $weightUnit",
                 modifier = Modifier.weight(1f)
             )
         } else if (estimatedBodyFat != null) {

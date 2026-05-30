@@ -18,7 +18,10 @@ class CenturyRepository @Inject constructor(
     // ===== User Profile =====
     fun getProfile(): Flow<UserProfile?> = userProfileDao.getProfile()
     suspend fun getProfileOnce(): UserProfile? = userProfileDao.getProfileOnce()
-    suspend fun insertProfile(profile: UserProfile): Long = userProfileDao.insertProfile(profile)
+    // Pin to id = 1 so the single canonical profile is created/overwritten in place.
+    // getProfile/updateProfile/updateCurrentDay all target id = 1; with autoGenerate an
+    // unpinned re-insert would land on id = 2+ and silently orphan the active profile.
+    suspend fun insertProfile(profile: UserProfile): Long = userProfileDao.insertProfile(profile.copy(id = 1))
     suspend fun updateProfile(profile: UserProfile) = userProfileDao.updateProfile(profile)
     suspend fun updateCurrentDay(day: Int) = userProfileDao.updateCurrentDay(day)
     suspend fun hasProfile(): Boolean = userProfileDao.getProfileCount() > 0
@@ -72,7 +75,7 @@ class CenturyRepository @Inject constructor(
         if (sessions.isEmpty()) return 0
 
         var streak = 0
-        val sortedDays = sessions.map { it.weekNumber * 7 + it.dayNumber }.sorted().reversed()
+        val sortedDays = sessions.map { it.weekNumber * 7 + it.dayNumber }.distinct().sorted().reversed()
         var expected = sortedDays.firstOrNull() ?: return 0
 
         for (day in sortedDays) {

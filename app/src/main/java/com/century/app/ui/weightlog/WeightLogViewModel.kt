@@ -34,7 +34,7 @@ class WeightLogViewModel @Inject constructor(
     fun adjustWeight(delta: Float) {
         val current = _inputWeight.value.toFloatOrNull() ?: profile.value?.bodyWeight ?: 70f
         val new = (current + delta).coerceIn(20f, 500f)
-        _inputWeight.value = String.format("%.1f", new)
+        _inputWeight.value = String.format(java.util.Locale.US, "%.1f", new)
     }
 
     fun setDate(millis: Long) {

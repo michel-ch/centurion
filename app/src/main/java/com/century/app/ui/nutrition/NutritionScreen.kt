@@ -423,9 +423,9 @@ private fun BmiScaleBar(bmi: Float) {
             // Gradient zones
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.weight(0.14f).fillMaxHeight().background(BmiUnderweight))
-                Box(Modifier.weight(0.4f).fillMaxHeight().background(BmiNormal))
+                Box(Modifier.weight(0.26f).fillMaxHeight().background(BmiNormal))
                 Box(Modifier.weight(0.2f).fillMaxHeight().background(BmiOverweight))
-                Box(Modifier.weight(0.26f).fillMaxHeight().background(BmiObese))
+                Box(Modifier.weight(0.4f).fillMaxHeight().background(BmiObese))
             }
             // Marker
             Box(

@@ -10,8 +10,10 @@ import com.century.app.data.repository.CenturyRepository
 import com.century.app.worker.ReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
@@ -117,6 +119,7 @@ class SettingsViewModel @Inject constructor(
                         bodyWeightUnit = "lbs",
                         height = p.heightCm / 30.48f,
                         heightUnit = "ft",
+                        heightInches = 0,
                         goalWeight = p.goalWeight?.let { it * 2.20462f },
                         updatedAt = System.currentTimeMillis()
                     ))
@@ -134,34 +137,56 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun exportData(): Intent? {
-        return try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.getDefault())
-            val fileName = "century_export_${dateFormat.format(Date())}.csv"
-            val file = File(context.cacheDir, fileName)
+    fun exportData(onReady: (Intent) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.getDefault())
+                val rowDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val fileName = "century_export_${dateFormat.format(Date())}.csv"
+                val file = File(context.cacheDir, fileName)
 
-            FileWriter(file).use { writer ->
-                writer.write("Type,Date,Value,Unit,Notes\n")
+                // Remove previous exports so the cache doesn't accumulate stale CSVs.
+                context.cacheDir.listFiles { f ->
+                    f.name.startsWith("century_export_") && f.name.endsWith(".csv")
+                }?.forEach { it.delete() }
 
-                // Weight logs would need to be loaded synchronously for export
-                // This is a simplified export
-                val profile = profile.value
-                if (profile != null) {
-                    writer.write("Profile,${dateFormat.format(Date(profile.createdAt))},${profile.name},,Created\n")
-                    writer.write("Weight,,${profile.bodyWeight},${profile.bodyWeightUnit},Current\n")
-                    writer.write("Height,,${profile.height},${profile.heightUnit},\n")
+                val profile = repository.getProfileOnce()
+                val weightLogs = repository.getAllWeightLogs().first()
+
+                FileWriter(file).use { writer ->
+                    writer.write("Type,Date,Value,Unit,Notes\n")
+
+                    if (profile != null) {
+                        writer.write(csvRow("Profile", rowDateFormat.format(Date(profile.createdAt)), profile.name, "", "Created"))
+                        writer.write(csvRow("Weight", "", profile.bodyWeight.toString(), profile.bodyWeightUnit, "Current"))
+                        writer.write(csvRow("Height", "", profile.height.toString(), profile.heightUnit, ""))
+                    }
+                    weightLogs.forEach { log ->
+                        writer.write(csvRow("WeightLog", rowDateFormat.format(Date(log.loggedAt)), log.weight.toString(), log.unit, ""))
+                    }
                 }
-            }
 
-            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-            Intent(Intent.ACTION_SEND).apply {
-                type = "text/csv"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/csv"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                withContext(Dispatchers.Main) { onReady(intent) }
+            } catch (_: Exception) {
             }
-        } catch (_: Exception) {
-            null
+        }
+    }
+
+    private fun csvRow(vararg fields: String): String =
+        fields.joinToString(separator = ",", postfix = "\n") { escapeCsv(it) }
+
+    private fun escapeCsv(field: String): String {
+        return if (field.contains(',') || field.contains('"') || field.contains('\n') || field.contains('\r')) {
+            "\"" + field.replace("\"", "\"\"") + "\""
+        } else {
+            field
         }
     }
 
