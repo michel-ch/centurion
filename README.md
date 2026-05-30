@@ -1,6 +1,6 @@
 # CENTURION — 100 Push-Up Challenge
 
-A native Android app that guides you through a 30-day bodyweight training program to build up to **100 consecutive push-ups**. Built with Kotlin and Jetpack Compose, featuring a dark brutalist aesthetic with bold red accents.
+A native Android app that guides you through a 28-day (4-week) bodyweight training program to build up to **100 consecutive push-ups**. Built with Kotlin and Jetpack Compose, featuring a dark brutalist aesthetic with bold red accents.
 
 ## Screenshots
 
@@ -36,7 +36,7 @@ Configure notifications, unit preferences (kg/lbs, cm/ft), export your data as C
 
 ## Features
 
-- **30-Day Program** — 4 weeks progressing from foundation to the 100 push-up challenge
+- **28-Day Program** — 4 weeks progressing from foundation to the 100 push-up challenge
 - **Fitness Level Adaptation** — Beginner / Intermediate / Advanced adjustments
 - **Rest Timer System** — Auto-countdown between sets with progressive reduction
 - **Set-by-Set Tracking** — Individual set completion with visual circles
