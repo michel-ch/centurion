@@ -54,6 +54,8 @@ Configure notifications, unit preferences (kg/lbs, cm/ft), export your data as C
 
 See [Architecture.md](Architecture.md) for the full tech stack, project structure, build instructions, and design details.
 
+For Codex/agent context routing, focused file scopes, and verification commands, see [docs/README.md](docs/README.md).
+
 ## License
 
 Private project — all rights reserved.

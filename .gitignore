@@ -4,18 +4,30 @@ app/build/
 
 # Local configuration (contains SDK path, do not commit)
 local.properties
+.env
+.env.*
+.envrc
+!.env.example
 
 # Gradle wrapper caches
 .gradle/
+.kotlin/
 
 # IDE files
 .idea/
+.vscode/
+.fleet/
 *.iml
 *.ipr
 *.iws
 
 # Android Studio navigation editor temp files
 .navigation/
+captures/
+
+# Native/NDK generated files
+.cxx/
+externalNativeBuild/
 
 # OS-specific
 .DS_Store
@@ -26,12 +38,20 @@ keystore.properties
 *.jks
 *.keystore
 
+# Release/package artifacts
+*.apk
+*.aab
+*.ap_
+*.idsig
+
 # Local/generated artifacts
 .stfolder/
+.stversions/
 graphify-out/
 
 # Log files
 *.log
+*.hprof
 
 # Claude internal
 .claude/
