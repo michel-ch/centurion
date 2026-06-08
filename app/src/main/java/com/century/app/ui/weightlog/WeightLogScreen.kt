@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.century.app.data.local.entity.WeightLog
+import com.century.app.data.local.entity.isSaneWeight
 import com.century.app.ui.components.CenturyCard
 import com.century.app.ui.components.CenturyTopBar
 import com.century.app.ui.theme.*
@@ -59,6 +60,10 @@ fun WeightLogScreen(
                         color = CenturyRed
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+
+                    val inputWeightValue = inputWeight.toFloatOrNull()
+                    val inputWeightError = inputWeight.isNotEmpty() &&
+                            (inputWeightValue == null || !isSaneWeight(inputWeightValue, unit))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -103,6 +108,10 @@ fun WeightLogScreen(
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             singleLine = true,
+                            isError = inputWeightError,
+                            supportingText = if (inputWeightError) {
+                                { Text("Invalid") }
+                            } else null,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = CenturyRed,
                                 unfocusedBorderColor = DarkBorder
@@ -128,7 +137,7 @@ fun WeightLogScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = CenturyRed),
                         shape = RoundedCornerShape(4.dp),
-                        enabled = inputWeight.toFloatOrNull() != null
+                        enabled = inputWeightValue?.let { isSaneWeight(it, unit) } == true
                     ) {
                         Text(
                             text = "LOG WEIGHT",
@@ -166,7 +175,7 @@ fun WeightLogScreen(
                     val index = logs.indexOf(log)
                     if (index < logs.size - 1) logs[index + 1] else null
                 }
-                val change = previousLog?.let { log.weight - it.weight }
+                val change = previousLog?.let { log.weight - it.weightInUnit(log.unit) }
 
                 SwipeToDismissBox(
                     state = rememberSwipeToDismissBoxState(
@@ -221,7 +230,7 @@ fun WeightLogScreen(
                                 }
                                 val prefix = if (change > 0) "+" else ""
                                 Text(
-                                    text = "$prefix${String.format("%.1f", change)}",
+                                    text = "$prefix${String.format("%.1f", change)} ${log.unit}",
                                     style = MaterialTheme.typography.labelLarge,
                                     color = changeColor
                                 )

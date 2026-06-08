@@ -14,6 +14,18 @@ data class ProgramDay(
     val isRestDay: Boolean = false
 )
 
+data class ProgramDayId(
+    val weekNumber: Int,
+    val dayNumber: Int
+)
+
+data class ProgramDayLookup(
+    val id: ProgramDayId,
+    val absoluteDay: Int,
+    val week: ProgramWeek,
+    val day: ProgramDay
+)
+
 data class ProgramExercise(
     val name: String,
     val sets: Int,
@@ -34,14 +46,51 @@ object TrainingProgramData {
     /** Total number of days in the program (4 weeks × 7 days = 28). */
     fun totalDays(): Int = getProgram().sumOf { it.days.size }
 
+    fun getProgramDay(absoluteDay: Int): ProgramDayLookup? {
+        if (absoluteDay < 1) return null
+
+        var firstDayOfWeek = 1
+        getProgram().forEach { week ->
+            val dayIndex = absoluteDay - firstDayOfWeek
+            if (dayIndex in week.days.indices) {
+                val day = week.days[dayIndex]
+                return ProgramDayLookup(
+                    id = ProgramDayId(week.weekNumber, day.dayNumber),
+                    absoluteDay = absoluteDay,
+                    week = week,
+                    day = day
+                )
+            }
+            firstDayOfWeek += week.days.size
+        }
+        return null
+    }
+
+    fun getProgramDay(id: ProgramDayId): ProgramDayLookup? {
+        val absoluteDay = absoluteDayFor(id) ?: return null
+        val lookup = getProgramDay(absoluteDay) ?: return null
+        return lookup.takeIf { it.id == id }
+    }
+
     fun getDayForProgram(absoluteDay: Int): Pair<ProgramWeek, ProgramDay>? {
-        val weekIndex = (absoluteDay - 1) / 7
-        val dayIndex = (absoluteDay - 1) % 7
-        val weeks = getProgram()
-        if (weekIndex !in weeks.indices) return null
-        val week = weeks[weekIndex]
-        if (dayIndex !in week.days.indices) return null
-        return week to week.days[dayIndex]
+        return getProgramDay(absoluteDay)?.let { it.week to it.day }
+    }
+
+    fun dayIdFor(weekNumber: Int, dayNumber: Int): ProgramDayId? {
+        val id = ProgramDayId(weekNumber, dayNumber)
+        return id.takeIf { getProgramDay(it) != null }
+    }
+
+    fun absoluteDayFor(id: ProgramDayId): Int? {
+        var firstDayOfWeek = 1
+        getProgram().forEach { week ->
+            if (week.weekNumber == id.weekNumber) {
+                val dayIndex = week.days.indexOfFirst { it.dayNumber == id.dayNumber }
+                return if (dayIndex >= 0) firstDayOfWeek + dayIndex else null
+            }
+            firstDayOfWeek += week.days.size
+        }
+        return null
     }
 
     fun adjustForFitnessLevel(

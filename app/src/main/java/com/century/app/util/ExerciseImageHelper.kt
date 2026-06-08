@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.century.app.R
 import java.io.File
 import java.io.FileOutputStream
 
@@ -87,9 +88,26 @@ object ExerciseImageHelper {
         return sampleSize
     }
 
+    fun hasDrawableResource(context: Context, illustrationId: String): Boolean {
+        val safeId = sanitizeId(illustrationId) ?: return false
+        return findDrawableResId(context, getDrawableResourceName(safeId)) != 0
+    }
+
+    fun getMissingDrawableIds(context: Context, illustrationIds: Iterable<String>): List<String> {
+        return illustrationIds.filterNot { hasDrawableResource(context, it) }
+    }
+
     fun getDrawableResId(context: Context, illustrationId: String): Int {
-        val safeId = sanitizeId(illustrationId) ?: return 0
-        val resName = "exercise_$safeId"
-        return context.resources.getIdentifier(resName, "drawable", context.packageName)
+        val safeId = sanitizeId(illustrationId) ?: return R.drawable.exercise_placeholder
+        val resId = findDrawableResId(context, getDrawableResourceName(safeId))
+        return if (resId != 0) resId else R.drawable.exercise_placeholder
+    }
+
+    private fun getDrawableResourceName(safeId: String): String {
+        return "exercise_$safeId"
+    }
+
+    private fun findDrawableResId(context: Context, resourceName: String): Int {
+        return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
     }
 }

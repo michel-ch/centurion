@@ -12,6 +12,7 @@ import com.century.app.domain.model.ProgramExercise
 import com.century.app.domain.model.TrainingProgramData
 import com.century.app.util.CalorieCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,6 +75,7 @@ class WorkoutViewModel @Inject constructor(
     private var exerciseLogIds: MutableMap<Int, Long> = mutableMapOf()
     // exerciseIndex -> reps achieved on a MAX test, so they feed the session rep total.
     private var maxTestReps: MutableMap<Int, Int> = mutableMapOf()
+    private var exerciseSaveJobs: MutableList<Job> = mutableListOf()
 
     fun loadWorkout(week: Int, day: Int) {
         // Guard: don't reload if already loaded for the same day (prevents orientation reset)
@@ -125,6 +127,7 @@ class WorkoutViewModel @Inject constructor(
                 // Reset per-session bookkeeping for this (re)load.
                 exerciseLogIds = mutableMapOf()
                 maxTestReps = mutableMapOf()
+                exerciseSaveJobs = mutableListOf()
                 accumulatedRestTimeMs = 0L
 
                 // Check for existing session or create new one
@@ -140,7 +143,8 @@ class WorkoutViewModel @Inject constructor(
                     // Restore exercise states from saved exercise logs
                     val savedLogs = repository.getExercisesForSessionOnce(sessionId)
                     exerciseStates = adjustedExercises.mapIndexed { index, exercise ->
-                        val savedLog = savedLogs.find { it.exerciseName == exercise.name }
+                        val savedLog = savedLogs.find { it.exerciseIndex == index }
+                            ?: savedLogs.find { it.exerciseName == exercise.name }
                         if (savedLog != null) {
                             // Remember the row id so future saves update it in place.
                             exerciseLogIds[index] = savedLog.id
@@ -160,7 +164,8 @@ class WorkoutViewModel @Inject constructor(
                     sessionStartTime = System.currentTimeMillis()
                     val savedLogs = repository.getExercisesForSessionOnce(sessionId)
                     exerciseStates = adjustedExercises.mapIndexed { index, exercise ->
-                        val savedLog = savedLogs.find { it.exerciseName == exercise.name }
+                        val savedLog = savedLogs.find { it.exerciseIndex == index }
+                            ?: savedLogs.find { it.exerciseName == exercise.name }
                         if (savedLog != null) {
                             // Preserve the row id so the redo updates it in place.
                             exerciseLogIds[index] = savedLog.id
@@ -312,11 +317,12 @@ class WorkoutViewModel @Inject constructor(
         // Remember the achieved count so finishWorkout uses it for rep totals/logs.
         maxTestReps[exerciseIndex] = achievedCount
 
-        viewModelScope.launch {
+        launchExerciseSave {
             val existingId = exerciseLogIds[exerciseIndex]
             val log = ExerciseLog(
                 id = existingId ?: 0,
                 sessionId = state.sessionId,
+                exerciseIndex = exerciseIndex,
                 exerciseName = exercise.name,
                 illustrationId = exercise.illustrationId,
                 targetSets = exercise.sets,
@@ -433,6 +439,8 @@ class WorkoutViewModel @Inject constructor(
         timedExerciseJobs.clear()
 
         viewModelScope.launch {
+            exerciseSaveJobs.toList().forEach { it.join() }
+
             val completionTime = System.currentTimeMillis()
             val totalDurationMs = completionTime - state.startTime
             val profile = userProfile
@@ -485,12 +493,8 @@ class WorkoutViewModel @Inject constructor(
                 estimatedCalories = estimatedCalories,
                 isCompleted = true
             )
-            repository.updateSession(session)
-
-            // Save individual exercise logs (update the row already created during
-            // the session instead of inserting a duplicate).
-            state.exercises.forEachIndexed { index, exercise ->
-                val exState = state.exerciseStates.getOrNull(index) ?: return@forEachIndexed
+            val exerciseLogs = state.exercises.mapIndexedNotNull { index, exercise ->
+                val exState = state.exerciseStates.getOrNull(index) ?: return@mapIndexedNotNull null
                 val maxTestCount = maxTestReps[index]
                 val repsCompleted = when {
                     maxTestCount != null -> maxTestCount
@@ -505,9 +509,10 @@ class WorkoutViewModel @Inject constructor(
                 }
 
                 val existingId = exerciseLogIds[index]
-                val log = ExerciseLog(
+                ExerciseLog(
                     id = existingId ?: 0,
                     sessionId = state.sessionId,
+                    exerciseIndex = index,
                     exerciseName = exercise.name,
                     illustrationId = exercise.illustrationId,
                     targetSets = exercise.sets,
@@ -518,20 +523,20 @@ class WorkoutViewModel @Inject constructor(
                     restBetweenExercisesSec = exercise.restBetweenExercisesSec,
                     completedAt = if (exState.isCompleted) completionTime else null
                 )
-                if (existingId != null) {
-                    repository.updateExercise(log)
-                } else {
-                    exerciseLogIds[index] = repository.insertExercise(log)
-                }
             }
 
-            // Advance current day in profile
-            if (profile != null) {
+            val nextCurrentDay = if (profile != null) {
                 val absoluteDay = (state.weekNumber - 1) * 7 + state.dayNumber
                 if (absoluteDay >= profile.currentDay) {
-                    repository.updateCurrentDay(absoluteDay + 1)
+                    absoluteDay + 1
+                } else {
+                    null
                 }
+            } else {
+                null
             }
+
+            repository.finishWorkout(session, exerciseLogs, nextCurrentDay)
 
             _uiState.value = state.copy(
                 isResting = false,
@@ -577,7 +582,7 @@ class WorkoutViewModel @Inject constructor(
         val state = _uiState.value
         val exercise = state.exercises.getOrNull(exerciseIndex) ?: return
 
-        viewModelScope.launch {
+        launchExerciseSave {
             val repsCompleted = run {
                 val perSet = Regex("\\d+").find(exercise.reps)?.value?.toIntOrNull() ?: 0
                 setsCompleted * perSet
@@ -587,6 +592,7 @@ class WorkoutViewModel @Inject constructor(
             val log = ExerciseLog(
                 id = existingId ?: 0,
                 sessionId = state.sessionId,
+                exerciseIndex = exerciseIndex,
                 exerciseName = exercise.name,
                 illustrationId = exercise.illustrationId,
                 targetSets = exercise.sets,
@@ -603,6 +609,17 @@ class WorkoutViewModel @Inject constructor(
                 exerciseLogIds[exerciseIndex] = repository.insertExercise(log)
             }
         }
+    }
+
+    private fun launchExerciseSave(block: suspend () -> Unit) {
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            block()
+        }
+        exerciseSaveJobs.add(job)
+        job.invokeOnCompletion {
+            exerciseSaveJobs.remove(job)
+        }
+        job.start()
     }
 
     private fun parseTimedSeconds(reps: String): Int {

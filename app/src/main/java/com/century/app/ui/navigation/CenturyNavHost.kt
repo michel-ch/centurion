@@ -20,6 +20,8 @@ import kotlinx.coroutines.delay
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.*
 import androidx.navigation.compose.*
+import com.century.app.domain.model.ProgramDayId
+import com.century.app.domain.model.TrainingProgramData
 import com.century.app.ui.home.HomeScreen
 import com.century.app.ui.home.HomeViewModel
 import com.century.app.ui.onboarding.OnboardingScreen
@@ -42,7 +44,12 @@ sealed class Screen(val route: String) {
     data object Onboarding : Screen("onboarding")
     data object Home : Screen("home")
     data object Workout : Screen("workout/{week}/{day}") {
-        fun createRoute(week: Int, day: Int) = "workout/$week/$day"
+        fun createRoute(week: Int, day: Int): String {
+            require(TrainingProgramData.dayIdFor(week, day) != null) {
+                "Invalid workout route args: week=$week day=$day"
+            }
+            return "workout/$week/$day"
+        }
     }
     data object Program : Screen("program")
     data object Progress : Screen("progress")
@@ -178,17 +185,35 @@ fun CenturyNavHost() {
                     navArgument("day") { type = NavType.IntType }
                 )
             ) { backStackEntry ->
-                val week = backStackEntry.arguments?.getInt("week") ?: 1
-                val day = backStackEntry.arguments?.getInt("day") ?: 1
-                val viewModel: WorkoutViewModel = hiltViewModel()
-                LaunchedEffect(week, day) { viewModel.loadWorkout(week, day) }
-                WorkoutScreen(
-                    viewModel = viewModel,
-                    onBack = { navController.popBackStack() },
-                    onComplete = {
-                        navController.popBackStack()
+                val week = backStackEntry.arguments?.getInt("week")
+                val day = backStackEntry.arguments?.getInt("day")
+                val requestedDay = remember(week, day) {
+                    if (week != null && day != null) {
+                        TrainingProgramData.getProgramDay(ProgramDayId(week, day))
+                    } else null
+                }
+
+                if (requestedDay == null) {
+                    LaunchedEffect(week, day) {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Program.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     }
-                )
+                } else {
+                    val viewModel: WorkoutViewModel = hiltViewModel()
+                    LaunchedEffect(requestedDay.id) {
+                        viewModel.loadWorkout(requestedDay.id.weekNumber, requestedDay.id.dayNumber)
+                    }
+                    WorkoutScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
+                        onComplete = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
             }
 
             composable(Screen.Program.route) {

@@ -1,13 +1,22 @@
 package com.century.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "exercise_log")
+@Entity(
+    tableName = "exercise_log",
+    indices = [
+        Index(value = ["sessionId", "exerciseIndex"], unique = true)
+    ]
+)
 data class ExerciseLog(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val sessionId: Long,
+    @ColumnInfo(defaultValue = "0")
+    val exerciseIndex: Int = 0,
     val exerciseName: String,
     val illustrationId: String,
     val targetSets: Int,

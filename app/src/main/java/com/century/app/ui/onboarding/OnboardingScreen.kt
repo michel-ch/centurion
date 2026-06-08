@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.century.app.data.local.entity.isSaneWeight
 import com.century.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -431,7 +432,8 @@ private fun NameStep(state: OnboardingState, viewModel: OnboardingViewModel) {
 @Composable
 private fun BodyWeightStep(state: OnboardingState, viewModel: OnboardingViewModel) {
     val weightVal = state.bodyWeight.toFloatOrNull()
-    val showError = state.bodyWeight.isNotEmpty() && (weightVal == null || weightVal <= 0f)
+    val showError = state.bodyWeight.isNotEmpty() &&
+            (weightVal == null || !isSaneWeight(weightVal, state.bodyWeightUnit))
 
     StepTitle("Body Weight")
     StepSubtitle("Enter your current body weight.")
@@ -644,7 +646,8 @@ private fun MaxPushUpsStep(state: OnboardingState, viewModel: OnboardingViewMode
 @Composable
 private fun GoalWeightStep(state: OnboardingState, viewModel: OnboardingViewModel) {
     val goalVal = state.goalWeight.toFloatOrNull()
-    val showError = state.goalWeight.isNotEmpty() && (goalVal == null || goalVal <= 0f)
+    val showError = state.goalWeight.isNotEmpty() &&
+            (goalVal == null || !isSaneWeight(goalVal, state.bodyWeightUnit))
 
     StepTitle("Goal Weight")
     StepSubtitle("Optional. Set a target body weight to track progress.")

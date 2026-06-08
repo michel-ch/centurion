@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.century.app.data.local.entity.UserProfile
 import com.century.app.data.local.entity.WeightLog
+import com.century.app.data.local.entity.isSaneWeight
 import com.century.app.data.repository.CenturyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -46,6 +47,7 @@ class WeightLogViewModel @Inject constructor(
         viewModelScope.launch {
             val currentProfile = profile.value ?: repository.getProfileOnce()
             val unit = currentProfile?.bodyWeightUnit ?: "kg"
+            if (!isSaneWeight(weight, unit)) return@launch
             repository.insertWeightLog(
                 WeightLog(
                     weight = weight,

@@ -7,6 +7,7 @@ import com.century.app.data.local.entity.UserProfile
 import com.century.app.data.local.entity.WeightLog
 import com.century.app.data.local.entity.WorkoutSession
 import com.century.app.data.repository.CenturyRepository
+import com.century.app.domain.model.TrainingProgramData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,7 +25,12 @@ class ProgressViewModel @Inject constructor(
 
     val pushUpTests: Flow<List<PushUpTest>> = repository.getAllPushUpTests()
 
-    val completedSessions: Flow<List<WorkoutSession>> = repository.getCompletedSessions()
+    val completedSessions: StateFlow<List<WorkoutSession>> = repository.getCompletedSessions()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val completedProgramDays: StateFlow<Int> = completedSessions
+        .map { sessions -> distinctProgramDays(sessions).size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val totalReps: StateFlow<Int> = repository.getTotalReps()
         .map { it ?: 0 }
@@ -34,15 +40,16 @@ class ProgressViewModel @Inject constructor(
         .map { it ?: 0f }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0f)
 
-    private val _streak = MutableStateFlow(0)
-    val streak: StateFlow<Int> = _streak.asStateFlow()
+    val streak: StateFlow<Int> = completedSessions
+        .map { sessions -> calculateCurrentStreak(sessions) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    private val _longestStreak = MutableStateFlow(0)
-    val longestStreak: StateFlow<Int> = _longestStreak.asStateFlow()
+    val longestStreak: StateFlow<Int> = completedSessions
+        .map { sessions -> calculateLongestStreak(sessions) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init {
         loadProfile()
-        loadStreaks()
     }
 
     private fun loadProfile() {
@@ -53,24 +60,9 @@ class ProgressViewModel @Inject constructor(
         }
     }
 
-    private fun loadStreaks() {
-        viewModelScope.launch {
-            _streak.value = repository.calculateStreak()
-        }
-        viewModelScope.launch {
-            repository.getCompletedSessions().collect { sessions ->
-                _longestStreak.value = calculateLongestStreak(sessions)
-            }
-        }
-    }
-
     private fun calculateLongestStreak(sessions: List<WorkoutSession>): Int {
-        if (sessions.isEmpty()) return 0
-
-        val sortedDays = sessions
-            .map { it.weekNumber * 7 + it.dayNumber }
-            .distinct()
-            .sorted()
+        val sortedDays = distinctProgramDays(sessions)
+        if (sortedDays.isEmpty()) return 0
 
         var longest = 1
         var current = 1
@@ -84,6 +76,30 @@ class ProgressViewModel @Inject constructor(
             }
         }
         return longest
+    }
+
+    private fun calculateCurrentStreak(sessions: List<WorkoutSession>): Int {
+        val sortedDays = distinctProgramDays(sessions).asReversed()
+        var streak = 0
+        var expected = sortedDays.firstOrNull() ?: return 0
+
+        for (day in sortedDays) {
+            if (day == expected) {
+                streak++
+                expected--
+            } else break
+        }
+        return streak
+    }
+
+    private fun distinctProgramDays(sessions: List<WorkoutSession>): List<Int> {
+        return sessions
+            .mapNotNull { session ->
+                TrainingProgramData.dayIdFor(session.weekNumber, session.dayNumber)
+                    ?.let { TrainingProgramData.absoluteDayFor(it) }
+            }
+            .distinct()
+            .sorted()
     }
 
     /**

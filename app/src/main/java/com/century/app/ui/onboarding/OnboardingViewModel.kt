@@ -1,10 +1,14 @@
 package com.century.app.ui.onboarding
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.century.app.data.local.entity.UserProfile
+import com.century.app.data.local.entity.isSaneWeight
 import com.century.app.data.repository.CenturyRepository
+import com.century.app.worker.ReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +34,8 @@ data class OnboardingState(
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val repository: CenturyRepository
+    private val repository: CenturyRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
@@ -125,7 +130,7 @@ class OnboardingViewModel @Inject constructor(
             0 -> s.name.trim().length in 2..30
             1 -> {
                 val w = s.bodyWeight.toFloatOrNull()
-                w != null && w > 0f
+                w != null && isSaneWeight(w, s.bodyWeightUnit)
             }
             2 -> {
                 val h = s.height.toFloatOrNull()
@@ -148,7 +153,8 @@ class OnboardingViewModel @Inject constructor(
             }
             7 -> {
                 // Goal weight is optional; if entered it must be valid
-                s.goalWeight.isBlank() || (s.goalWeight.toFloatOrNull()?.let { it > 0f } == true)
+                s.goalWeight.isBlank() ||
+                        (s.goalWeight.toFloatOrNull()?.let { isSaneWeight(it, s.bodyWeightUnit) } == true)
             }
             8 -> {
                 // Reminder time must match HH:mm pattern
@@ -169,7 +175,7 @@ class OnboardingViewModel @Inject constructor(
 
         // Final validation
         if (s.name.trim().length !in 2..30 ||
-            s.bodyWeight.toFloatOrNull() == null ||
+            s.bodyWeight.toFloatOrNull()?.let { isSaneWeight(it, s.bodyWeightUnit) } != true ||
             s.height.toFloatOrNull() == null ||
             s.age.toIntOrNull() == null ||
             s.gender.isBlank() ||
@@ -201,6 +207,7 @@ class OnboardingViewModel @Inject constructor(
                     profilePhotoUri = s.profilePhotoUri
                 )
                 repository.insertProfile(profile)
+                ReminderWorker.schedule(context, profile.reminderTime, profile.reminderEnabled)
                 _isSaving.value = false
                 onSuccess()
             } catch (e: Exception) {

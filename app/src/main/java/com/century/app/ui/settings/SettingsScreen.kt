@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.century.app.data.local.entity.isSaneWeight
 import com.century.app.ui.components.CenturyCard
 import com.century.app.ui.components.CenturyTopBar
 import com.century.app.ui.theme.*
@@ -34,7 +35,9 @@ fun SettingsScreen(
     onResetComplete: () -> Unit
 ) {
     val profile by viewModel.profile.collectAsState()
+    val exportError by viewModel.exportError.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     var showResetDialog by remember { mutableStateOf(false) }
     var editName by remember { mutableStateOf(false) }
     var nameInput by remember { mutableStateOf("") }
@@ -50,10 +53,18 @@ fun SettingsScreen(
         }
     }
 
+    LaunchedEffect(exportError) {
+        exportError?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearExportError()
+        }
+    }
+
     Scaffold(
         topBar = {
             CenturyTopBar(title = "SETTINGS", onBack = onBack)
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -123,13 +134,22 @@ fun SettingsScreen(
             item {
                 CenturyCard {
                     if (editWeight) {
+                        val weightUnit = profile?.bodyWeightUnit ?: "kg"
+                        val weightValue = weightInput.toFloatOrNull()
+                        val showWeightError = weightInput.isNotEmpty() &&
+                                (weightValue == null || !isSaneWeight(weightValue, weightUnit))
+
                         OutlinedTextField(
                             value = weightInput,
                             onValueChange = { weightInput = it },
-                            label = { Text("Weight (${profile?.bodyWeightUnit ?: "kg"})") },
+                            label = { Text("Weight ($weightUnit)") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            isError = showWeightError,
+                            supportingText = if (showWeightError) {
+                                { Text("Enter a valid weight") }
+                            } else null,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = CenturyRed
                             )
@@ -144,11 +164,12 @@ fun SettingsScreen(
                             }
                             TextButton(
                                 onClick = {
-                                    weightInput.toFloatOrNull()?.let {
+                                    weightValue?.takeIf { isSaneWeight(it, weightUnit) }?.let {
                                         viewModel.updateWeight(it)
                                         editWeight = false
                                     }
                                 },
+                                enabled = weightValue?.let { isSaneWeight(it, weightUnit) } == true,
                                 colors = ButtonDefaults.textButtonColors(contentColor = CenturyRed)
                             ) {
                                 Text("SAVE")
@@ -381,7 +402,11 @@ fun SettingsScreen(
                         value = "CSV",
                         onClick = {
                             viewModel.exportData { intent ->
-                                context.startActivity(Intent.createChooser(intent, "Export Century Data"))
+                                try {
+                                    context.startActivity(Intent.createChooser(intent, "Export Century Data"))
+                                } catch (_: Exception) {
+                                    viewModel.reportExportFailure()
+                                }
                             }
                         }
                     )

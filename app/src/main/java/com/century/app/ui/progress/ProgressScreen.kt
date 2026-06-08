@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.century.app.data.local.entity.PushUpTest
 import com.century.app.data.local.entity.WeightLog
+import com.century.app.domain.model.TrainingProgramData
 import com.century.app.ui.components.CenturyCard
 import com.century.app.ui.components.CenturyTopBar
 import com.century.app.ui.components.InfoIconButton
@@ -35,7 +36,7 @@ fun ProgressScreen(
     val profile by viewModel.profile.collectAsState()
     val weightLogs by viewModel.weightLogs.collectAsState(initial = emptyList())
     val pushUpTests by viewModel.pushUpTests.collectAsState(initial = emptyList())
-    val completedSessions by viewModel.completedSessions.collectAsState(initial = emptyList())
+    val completedProgramDays by viewModel.completedProgramDays.collectAsState()
     val totalReps by viewModel.totalReps.collectAsState()
     val totalCalories by viewModel.totalCalories.collectAsState()
     val streak by viewModel.streak.collectAsState()
@@ -45,15 +46,9 @@ fun ProgressScreen(
     val weightChange = viewModel.calculateWeightChange(weightLogs)
     val estimatedBodyFat = viewModel.estimateBodyFat()
 
-    val totalDays = 28
-    // Count each program day once: redoing a completed day inserts a new session row,
-    // so completedSessions can contain duplicate (week, day) pairs.
-    val uniqueCompletedDays = completedSessions
-        .map { it.weekNumber to it.dayNumber }
-        .distinct()
-        .size
+    val totalDays = TrainingProgramData.totalDays()
     val completionPercent = if (totalDays > 0) {
-        (uniqueCompletedDays.toFloat() / totalDays * 100f).coerceAtMost(100f)
+        (completedProgramDays.toFloat() / totalDays * 100f).coerceAtMost(100f)
     } else 0f
 
     Scaffold(
@@ -96,7 +91,7 @@ fun ProgressScreen(
             StreakConsistencyCard(
                 currentStreak = streak,
                 longestStreak = longestStreak,
-                totalWorkouts = uniqueCompletedDays,
+                totalWorkouts = completedProgramDays,
                 completionPercent = completionPercent
             )
 
@@ -379,9 +374,13 @@ private fun PushUpTestCard(tests: List<PushUpTest>) {
                 (improvement.toFloat() / sortedTests.first().maxReps * 100f)
             } else 0f
             Text(
-                text = "IMPROVEMENT: +$improvement REPS (${String.format("%.0f", improvementPercent)}%)",
+                text = "IMPROVEMENT: ${formatSignedCount(improvement)} REPS (${formatSignedPercent(improvementPercent)})",
                 style = MaterialTheme.typography.labelMedium,
-                color = CenturyGreen,
+                color = when {
+                    improvement > 0 -> CenturyGreen
+                    improvement < 0 -> CenturyOrange
+                    else -> TextSecondary
+                },
                 fontWeight = FontWeight.Bold
             )
         }
@@ -452,4 +451,13 @@ private fun formatNumber(value: Int): String {
 private fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("MMM dd", Locale.US)
     return sdf.format(Date(timestamp)).uppercase()
+}
+
+private fun formatSignedCount(value: Int): String {
+    return if (value > 0) "+$value" else value.toString()
+}
+
+private fun formatSignedPercent(value: Float): String {
+    val formatted = String.format("%.0f", value)
+    return if (value > 0f) "+$formatted%" else "$formatted%"
 }

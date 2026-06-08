@@ -102,7 +102,7 @@ fun HomeScreen(
             WeeklyProgressSection(
                 weekProgress = weekProgress,
                 currentDayInWeek = viewModel.currentDayInWeek,
-                weekNumber = viewModel.currentWeekNumber
+                isProgramComplete = viewModel.isProgramComplete
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -357,7 +357,7 @@ private fun QuickStatsRow(
 private fun WeeklyProgressSection(
     weekProgress: Float,
     currentDayInWeek: Int,
-    weekNumber: Int
+    isProgramComplete: Boolean
 ) {
     CenturyCard {
         Text(
@@ -382,7 +382,7 @@ private fun WeeklyProgressSection(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "DAY $currentDayInWeek",
+                        text = if (isProgramComplete) "DONE" else "DAY $currentDayInWeek",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Black
@@ -406,8 +406,8 @@ private fun WeeklyProgressSection(
             val dayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
             dayLabels.forEachIndexed { index, label ->
                 val dayNum = index + 1
-                val isCompleted = dayNum < currentDayInWeek
-                val isCurrent = dayNum == currentDayInWeek
+                val isCompleted = isProgramComplete || dayNum < currentDayInWeek
+                val isCurrent = !isProgramComplete && dayNum == currentDayInWeek
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(

@@ -1,9 +1,15 @@
 package com.century.app.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "workout_session")
+@Entity(
+    tableName = "workout_session",
+    indices = [
+        Index(value = ["userId", "weekNumber", "dayNumber"], unique = true)
+    ]
+)
 data class WorkoutSession(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

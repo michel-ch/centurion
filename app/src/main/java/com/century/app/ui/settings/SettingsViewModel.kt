@@ -6,6 +6,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.century.app.data.local.entity.UserProfile
+import com.century.app.data.local.entity.isSaneWeight
 import com.century.app.data.repository.CenturyRepository
 import com.century.app.worker.ReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileWriter
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -29,13 +31,8 @@ class SettingsViewModel @Inject constructor(
     val profile: StateFlow<UserProfile?> = repository.getProfile()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    init {
-        viewModelScope.launch {
-            repository.getProfileOnce()?.let { p ->
-                ReminderWorker.schedule(context, p.reminderTime, p.reminderEnabled)
-            }
-        }
-    }
+    private val _exportError = MutableStateFlow<String?>(null)
+    val exportError: StateFlow<String?> = _exportError.asStateFlow()
 
     fun updateProfile(profile: UserProfile) {
         viewModelScope.launch {
@@ -105,6 +102,7 @@ class SettingsViewModel @Inject constructor(
     fun updateWeight(weight: Float) {
         viewModelScope.launch {
             profile.value?.let {
+                if (!isSaneWeight(weight, it.bodyWeightUnit)) return@launch
                 repository.updateProfile(it.copy(bodyWeight = weight, updatedAt = System.currentTimeMillis()))
             }
         }
@@ -143,10 +141,14 @@ class SettingsViewModel @Inject constructor(
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.getDefault())
                 val rowDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val fileName = "century_export_${dateFormat.format(Date())}.csv"
-                val file = File(context.cacheDir, fileName)
+                val exportDir = File(context.cacheDir, "exports")
+                if (!exportDir.exists() && !exportDir.mkdirs()) {
+                    throw IOException("Unable to create export directory")
+                }
+                val file = File(exportDir, fileName)
 
                 // Remove previous exports so the cache doesn't accumulate stale CSVs.
-                context.cacheDir.listFiles { f ->
+                exportDir.listFiles { f ->
                     f.name.startsWith("century_export_") && f.name.endsWith(".csv")
                 }?.forEach { it.delete() }
 
@@ -175,8 +177,19 @@ class SettingsViewModel @Inject constructor(
                 }
                 withContext(Dispatchers.Main) { onReady(intent) }
             } catch (_: Exception) {
+                withContext(Dispatchers.Main) {
+                    _exportError.value = "Export failed. Please try again."
+                }
             }
         }
+    }
+
+    fun reportExportFailure() {
+        _exportError.value = "Export failed. Please try again."
+    }
+
+    fun clearExportError() {
+        _exportError.value = null
     }
 
     private fun csvRow(vararg fields: String): String =

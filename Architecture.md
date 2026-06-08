@@ -14,6 +14,10 @@
 - **Min SDK:** 26 (Android 8.0)
 - **Target SDK:** 34
 
+## Build Notes
+
+- Target SDK 35 is deferred. Android SDK 35 is installed locally, but this project is currently pinned to Android Gradle Plugin 8.2.2 and Kotlin 1.9.22; moving to SDK 35 should be handled as a coordinated AGP/Kotlin/Compose dependency upgrade with a full compile and regression pass.
+
 ## Build Instructions
 
 ### Prerequisites
@@ -70,7 +74,7 @@ The app uses a placeholder system for exercise images. To add real illustrations
 3. Place in `app/src/main/res/drawable/`
 4. The app will automatically use them instead of placeholders
 
-Users can also replace any exercise image with their own photos via long-press on the image card.
+The codebase includes storage helpers for future custom exercise images, but the app does not currently wire a photo picker into the workout flow.
 
 See the full list of illustration IDs in `TrainingProgram.kt`.
 

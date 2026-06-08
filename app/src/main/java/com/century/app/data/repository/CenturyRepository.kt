@@ -1,5 +1,7 @@
 package com.century.app.data.repository
 
+import androidx.room.withTransaction
+import com.century.app.data.local.CenturyDatabase
 import com.century.app.data.local.dao.*
 import com.century.app.data.local.entity.*
 import kotlinx.coroutines.flow.Flow
@@ -8,6 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class CenturyRepository @Inject constructor(
+    private val database: CenturyDatabase,
     private val userProfileDao: UserProfileDao,
     private val weightLogDao: WeightLogDao,
     private val workoutSessionDao: WorkoutSessionDao,
@@ -53,9 +56,23 @@ class CenturyRepository @Inject constructor(
         exerciseLogDao.getExercisesForSession(sessionId)
     suspend fun getExercisesForSessionOnce(sessionId: Long): List<ExerciseLog> =
         exerciseLogDao.getExercisesForSessionOnce(sessionId)
-    suspend fun insertExercise(log: ExerciseLog): Long = exerciseLogDao.insertExercise(log)
-    suspend fun insertExercises(logs: List<ExerciseLog>) = exerciseLogDao.insertExercises(logs)
+    suspend fun insertExercise(log: ExerciseLog): Long = exerciseLogDao.upsertExercise(log)
+    suspend fun insertExercises(logs: List<ExerciseLog>) = exerciseLogDao.upsertExercises(logs)
     suspend fun updateExercise(log: ExerciseLog) = exerciseLogDao.updateExercise(log)
+
+    suspend fun finishWorkout(
+        session: WorkoutSession,
+        exerciseLogs: List<ExerciseLog>,
+        nextCurrentDay: Int?
+    ) {
+        database.withTransaction {
+            workoutSessionDao.updateSession(session)
+            exerciseLogDao.upsertExercises(exerciseLogs)
+            if (nextCurrentDay != null) {
+                userProfileDao.updateCurrentDay(nextCurrentDay)
+            }
+        }
+    }
 
     // ===== Exercise Images =====
     suspend fun getExerciseImage(illustrationId: String): ExerciseImage? =

@@ -1,9 +1,11 @@
 package com.century.app.ui.components
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,7 +50,7 @@ fun InfoIconButton(
         Icon(
             Icons.Default.Info,
             contentDescription = "Info",
-            tint = TextTertiary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
     }
@@ -62,7 +69,7 @@ fun InfoIconButton(
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             confirmButton = {
@@ -70,11 +77,11 @@ fun InfoIconButton(
                     Text(
                         "GOT IT",
                         style = MaterialTheme.typography.labelLarge,
-                        color = CenturyRed
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             },
-            containerColor = DarkSurfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }
@@ -98,7 +105,7 @@ fun CenturyTopBar(
                 Text(
                     text = "STRENGTH AND HONOR",
                     style = MaterialTheme.typography.labelSmall,
-                    color = CenturyRed.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     letterSpacing = 2.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -146,6 +153,7 @@ fun CenturyCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExerciseImageCard(
     illustrationId: String,
@@ -160,14 +168,32 @@ fun ExerciseImageCard(
     val resId = remember(illustrationId) {
         ExerciseImageHelper.getDrawableResId(context, illustrationId)
     }
+    val imageDescription = "$exerciseName illustration"
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
             .clip(RoundedCornerShape(12.dp))
-            .background(DarkSurfaceVariant)
-            .then(if (onLongPress != null) Modifier.clickable { onLongPress() } else Modifier),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .semantics {
+                contentDescription = imageDescription
+                if (onLongPress != null) {
+                    role = Role.Button
+                }
+            }
+            .then(
+                if (onLongPress != null) {
+                    Modifier.combinedClickable(
+                        role = Role.Button,
+                        onLongClickLabel = "Customize exercise image",
+                        onLongClick = onLongPress,
+                        onClick = {}
+                    )
+                } else {
+                    Modifier
+                }
+            ),
         contentAlignment = Alignment.Center
     ) {
         when {
@@ -177,7 +203,7 @@ fun ExerciseImageCard(
                         .data(customFile)
                         .crossfade(300)
                         .build(),
-                    contentDescription = exerciseName,
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -188,7 +214,7 @@ fun ExerciseImageCard(
                         .data(resId)
                         .crossfade(300)
                         .build(),
-                    contentDescription = exerciseName,
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -203,13 +229,13 @@ fun ExerciseImageCard(
                         Icons.Default.FitnessCenter,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = TextTertiary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = exerciseName.uppercase(),
                         style = MaterialTheme.typography.labelMedium,
-                        color = TextTertiary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
@@ -241,32 +267,55 @@ fun SetTrackerRow(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         repeat(totalSets) { index ->
             val isCompleted = index < completedSets
+            val setNumber = index + 1
             Box(
                 modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isCompleted) CenturyGreen else Color.Transparent
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = if (isCompleted) CenturyGreen else TextTertiary,
-                        shape = CircleShape
-                    )
-                    .clickable { onSetTap(index) },
+                    .size(48.dp)
+                    .semantics {
+                        contentDescription = "Set $setNumber"
+                        stateDescription = if (isCompleted) "Completed" else "Not completed"
+                        role = Role.Button
+                    }
+                    .clickable(
+                        role = Role.Button,
+                        onClickLabel = if (isCompleted) {
+                            "Set $setNumber completed"
+                        } else {
+                            "Record set $setNumber"
+                        }
+                    ) { onSetTap(index) },
                 contentAlignment = Alignment.Center
             ) {
-                if (isCompleted) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = "Set ${index + 1} done",
-                        modifier = Modifier.size(16.dp),
-                        tint = Color.White
-                    )
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isCompleted) MaterialTheme.colorScheme.tertiary else Color.Transparent
+                        )
+                        .border(
+                            width = 2.dp,
+                            color = if (isCompleted) {
+                                MaterialTheme.colorScheme.tertiary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isCompleted) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
                 }
             }
         }
@@ -278,8 +327,8 @@ fun ProgressRing(
     progress: Float,
     modifier: Modifier = Modifier,
     strokeWidth: Float = 8f,
-    color: Color = CenturyRed,
-    backgroundColor: Color = DarkBorder,
+    color: Color = MaterialTheme.colorScheme.primary,
+    backgroundColor: Color = MaterialTheme.colorScheme.outline,
     content: @Composable () -> Unit = {}
 ) {
     val animatedProgress by animateFloatAsState(
@@ -328,12 +377,12 @@ fun StatCard(
         Text(
             text = value,
             style = MaterialTheme.typography.headlineMedium,
-            color = CenturyRed
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -349,7 +398,7 @@ fun RestTimerBar(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = DarkSurfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 8.dp
     ) {
         Column(
@@ -359,12 +408,12 @@ fun RestTimerBar(
             Text(
                 text = "REST",
                 style = MaterialTheme.typography.labelLarge,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "${remainingSeconds}s",
                 style = MaterialTheme.typography.displayLarge,
-                color = CenturyRed,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -373,14 +422,14 @@ fun RestTimerBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp),
-                color = CenturyRed,
-                trackColor = DarkBorder
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.outline
             )
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedButton(
                 onClick = onSkip,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = TextSecondary
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
                 Text("SKIP REST", style = MaterialTheme.typography.labelMedium)

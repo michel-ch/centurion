@@ -7,7 +7,6 @@ local.properties
 
 # Gradle wrapper caches
 .gradle/
-gradle/wrapper/gradle-wrapper.jar
 
 # IDE files
 .idea/
@@ -23,8 +22,13 @@ gradle/wrapper/gradle-wrapper.jar
 Thumbs.db
 
 # Keystore files (sensitive — keep out of source control)
+keystore.properties
 *.jks
 *.keystore
+
+# Local/generated artifacts
+.stfolder/
+graphify-out/
 
 # Log files
 *.log

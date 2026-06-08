@@ -30,7 +30,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.century.app.domain.model.ProgramDay
+import com.century.app.domain.model.ProgramDayId
 import com.century.app.domain.model.ProgramWeek
+import com.century.app.domain.model.TrainingProgramData
 import com.century.app.ui.components.CenturyTopBar
 import com.century.app.ui.theme.*
 
@@ -46,8 +48,9 @@ fun ProgramScreen(
     val weeks = viewModel.allWeeks
 
     val currentDay = profile?.currentDay ?: 1
-    val currentWeekNumber = ((currentDay - 1) / 7) + 1
-    val currentDayInWeek = ((currentDay - 1) % 7) + 1
+    val currentProgramDay = TrainingProgramData.getProgramDay(currentDay)
+    val currentWeekNumber = currentProgramDay?.id?.weekNumber
+    val currentDayInWeek = currentProgramDay?.id?.dayNumber
 
     Scaffold(
         topBar = {
@@ -93,17 +96,17 @@ fun ProgramScreen(
 @Composable
 private fun WeekAccordionCard(
     week: ProgramWeek,
-    completedDays: Set<Pair<Int, Int>>,
+    completedDays: Set<ProgramDayId>,
     currentDay: Int,
-    currentWeekNumber: Int,
-    currentDayInWeek: Int,
+    currentWeekNumber: Int?,
+    currentDayInWeek: Int?,
     initiallyExpanded: Boolean,
     onDayClick: (week: Int, day: Int) -> Unit
 ) {
     var expanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
 
     val completedInWeek = week.days.count { day ->
-        completedDays.contains(week.weekNumber to day.dayNumber)
+        completedDays.contains(ProgramDayId(week.weekNumber, day.dayNumber))
     }
     val isCurrentWeek = week.weekNumber == currentWeekNumber
     val borderColor = if (isCurrentWeek) CenturyRed else MaterialTheme.colorScheme.outline
@@ -188,13 +191,14 @@ private fun WeekAccordionCard(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     week.days.forEach { day ->
-                        val isCompleted = completedDays.contains(week.weekNumber to day.dayNumber)
+                        val dayId = ProgramDayId(week.weekNumber, day.dayNumber)
+                        val isCompleted = completedDays.contains(dayId)
                         val isToday = week.weekNumber == currentWeekNumber &&
                                 day.dayNumber == currentDayInWeek
                         // Days beyond the user's current day are locked until reached
                         // (already-completed days stay open so missed days can be redone).
-                        val absoluteDay = (week.weekNumber - 1) * 7 + day.dayNumber
-                        val isLocked = absoluteDay > currentDay && !isCompleted
+                        val isLocked = (TrainingProgramData.absoluteDayFor(dayId) ?: Int.MAX_VALUE) > currentDay &&
+                                !isCompleted
 
                         DayRow(
                             day = day,

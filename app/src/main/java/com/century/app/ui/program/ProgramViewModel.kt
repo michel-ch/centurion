@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.century.app.data.local.entity.UserProfile
 import com.century.app.data.repository.CenturyRepository
+import com.century.app.domain.model.ProgramDayId
 import com.century.app.domain.model.ProgramWeek
 import com.century.app.domain.model.TrainingProgramData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,8 +22,8 @@ class ProgramViewModel @Inject constructor(
     private val _profile = MutableStateFlow<UserProfile?>(null)
     val profile: StateFlow<UserProfile?> = _profile.asStateFlow()
 
-    private val _completedDays = MutableStateFlow<Set<Pair<Int, Int>>>(emptySet())
-    val completedDays: StateFlow<Set<Pair<Int, Int>>> = _completedDays.asStateFlow()
+    private val _completedDays = MutableStateFlow<Set<ProgramDayId>>(emptySet())
+    val completedDays: StateFlow<Set<ProgramDayId>> = _completedDays.asStateFlow()
 
     init {
         loadProfile()
@@ -41,7 +42,7 @@ class ProgramViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getCompletedSessions().collect { sessions ->
                 _completedDays.value = sessions
-                    .map { it.weekNumber to it.dayNumber }
+                    .mapNotNull { TrainingProgramData.dayIdFor(it.weekNumber, it.dayNumber) }
                     .toSet()
             }
         }

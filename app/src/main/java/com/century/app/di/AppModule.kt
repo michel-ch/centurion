@@ -22,7 +22,9 @@ object AppModule {
             context,
             CenturyDatabase::class.java,
             "century_database"
-        ).build()
+        )
+            .addMigrations(CenturyDatabase.MIGRATION_1_2)
+            .build()
     }
 
     @Provides

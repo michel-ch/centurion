@@ -1,9 +1,41 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
 }
+
+val localProperties = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.isFile) {
+        localFile.inputStream().use(::load)
+    }
+}
+
+val keystoreProperties = Properties().apply {
+    val keystoreFile = rootProject.file("keystore.properties")
+    if (keystoreFile.isFile) {
+        keystoreFile.inputStream().use(::load)
+    }
+}
+
+fun releaseSigningValue(envName: String, propertyName: String): String? =
+    providers.environmentVariable(envName).orNull
+        ?: keystoreProperties.getProperty(propertyName)
+        ?: localProperties.getProperty(propertyName)
+
+val releaseStoreFilePath = releaseSigningValue("CENTURION_RELEASE_STORE_FILE", "release.storeFile")
+val releaseStorePassword = releaseSigningValue("CENTURION_RELEASE_STORE_PASSWORD", "release.storePassword")
+val releaseKeyAlias = releaseSigningValue("CENTURION_RELEASE_KEY_ALIAS", "release.keyAlias")
+val releaseKeyPassword = releaseSigningValue("CENTURION_RELEASE_KEY_PASSWORD", "release.keyPassword")
+val hasReleaseSigningConfig = listOf(
+    releaseStoreFilePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.century.app"
@@ -28,18 +60,21 @@ android {
     }
 
     signingConfigs {
-        @Suppress("UNCHECKED_CAST")
-        create("release") {
-            storeFile = rootProject.file("centurion.jks")
-            storePassword = "centurion123"
-            keyAlias = "centurion"
-            keyPassword = "centurion123"
+        if (hasReleaseSigningConfig) {
+            create("release") {
+                storeFile = rootProject.file(requireNotNull(releaseStoreFilePath))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (hasReleaseSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -70,6 +105,26 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    val releaseBuildRequested = allTasks.any { task ->
+        task.project == project && task.name in setOf(
+            "assembleRelease",
+            "bundleRelease",
+            "packageRelease",
+            "installRelease"
+        )
+    }
+    if (releaseBuildRequested && !hasReleaseSigningConfig) {
+        throw GradleException(
+            "Release signing is not configured. Set CENTURION_RELEASE_STORE_FILE, " +
+                "CENTURION_RELEASE_STORE_PASSWORD, CENTURION_RELEASE_KEY_ALIAS, and " +
+                "CENTURION_RELEASE_KEY_PASSWORD, or define release.storeFile, " +
+                "release.storePassword, release.keyAlias, and release.keyPassword in " +
+                "untracked keystore.properties or local.properties."
+        )
     }
 }
 

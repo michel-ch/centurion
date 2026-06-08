@@ -46,7 +46,7 @@ Configure notifications, unit preferences (kg/lbs, cm/ft), export your data as C
 - **Progress Stats** — BMI, streaks, total reps, calorie estimates
 - **Nutrition Calculator** — Personalized macros, calories, and hydration
 - **Daily Reminders** — Configurable notifications via WorkManager
-- **Custom Exercise Images** — Replace any illustration with personal photos
+- **Exercise Illustrations** — Bundled static exercise drawings with placeholder fallback for missing assets
 - **Dark Brutalist Theme** — High-contrast dark theme with red accents
 - **Data Export** — Export workout history as CSV
 
