@@ -1,0 +1,69 @@
+%% CENTURION - full architecture flux topology (master Mermaid source)
+%% Node ids and F# labels are the join keys; keep identical to centurion-fluxes.md and .drawio.
+%% Solid edges = primary runtime/data fluxes; dotted edges = ops / system-boundary fluxes.
+flowchart TD
+  user([User])
+
+  subgraph UI[UI Layer - Jetpack Compose]
+    nav[CenturyNavHost]
+    screens[Compose Screens x8]
+  end
+
+  subgraph PRES[Presentation Layer - Hilt ViewModels]
+    vms[8 ViewModels]
+  end
+
+  subgraph DOM[Domain Layer - pure Kotlin]
+    domain[TrainingProgramData]
+    calc[CalorieCalculator]
+  end
+
+  subgraph DATA[Data Layer - Room + Hilt]
+    repo[CenturyRepository]
+    daos[6 Room DAOs]
+    db[(century_database)]
+    di[[AppModule DI]]
+  end
+
+  subgraph SYS[System / Android boundary]
+    app[CenturyApp]
+    wm[WorkManager]
+    worker[ReminderWorker]
+    notif[Notification channel]
+    act[MainActivity]
+    img[ExerciseImageHelper]
+    coil[Coil loader]
+    csv[CSV cache + FileProvider]
+    share[External share app]
+  end
+
+  user -->|F1 input| screens
+  user -->|F3 navigate| nav
+  nav -->|F3 route| screens
+  nav -->|F4 start-dest| vms
+  screens -->|F2 state/events| vms
+  vms -->|F6 adjust| domain
+  vms -->|F6 estimate| calc
+  vms -->|F7 suspend/Flow| repo
+  repo -->|F8 Room ops| daos
+  daos -->|F9 SQL| db
+  repo -->|F10 finish txn| db
+  di -.->|F11 provide DB| db
+  di -.->|F11 provide DAOs| daos
+  db -.->|F12 migrate v1-v2| db
+
+  app -.->|F13 WM config| wm
+  app -.->|F13 channel| notif
+  vms -.->|F14 schedule| wm
+  wm -.->|F15 daily| worker
+  worker -.->|F15 read| repo
+  worker -.->|F15 day| domain
+  worker -.->|F15 notify| notif
+  notif -.->|F15 shown| user
+  user -->|F16 tap| act
+  vms -->|F17 export| csv
+  repo -->|F17 read| csv
+  csv -->|F17 share| share
+  screens -->|F18 resolve| img
+  img -.->|F18 file| coil
+  coil -->|F18 bitmap| screens
